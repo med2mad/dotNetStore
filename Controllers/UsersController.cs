@@ -46,6 +46,7 @@ namespace dotNetStore.Controllers
         // GET: Users/Create
         public IActionResult Create()
         {
+            Console.WriteLine("22");
             return View();
         }
 
@@ -53,7 +54,8 @@ namespace dotNetStore.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(User user)
         {
-            return Ok(user);
+            Console.WriteLine("11");
+            return RedirectToAction("Create");
         }
 
         // GET: Users/Edit/5
