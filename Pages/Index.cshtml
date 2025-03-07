@@ -1,0 +1,10 @@
+﻿@page
+@model dotNetStore.Pages.IndexModel
+@{
+}
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input type="text" asp-for="Name" />
+    <button type="submit">Submit</button>
+</form>

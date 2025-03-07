@@ -5,8 +5,12 @@ namespace dotNetStore.Pages
 {
     public class IndexModel : PageModel
     {
-        public void OnGet()
+        [BindProperty]
+        public string Name { get; set; }
+
+        public void OnPost()
         {
+            Console.WriteLine($"Received: {Name}");
         }
     }
 }
