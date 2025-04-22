@@ -1,5 +1,6 @@
 using dotNetStore.Components;
 using dotNetStore.Components.Account;
+using dotNetStore.Components.Layout;
 using dotNetStore.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
