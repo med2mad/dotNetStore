@@ -2,9 +2,6 @@
     "use strict";
 
     window.initializeScripts = () => {
-        //console.log("Scripts initialized");
-        //confirm("Scripts initialized");
-
         // Mobile Nav toggle
         $('.menu-toggle > a').off('click').on('click', function (e) {
             e.preventDefault();

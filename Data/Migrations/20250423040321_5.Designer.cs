@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using dotNetStore.Data;
 
@@ -11,9 +12,11 @@ using dotNetStore.Data;
 namespace dotNetStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250423040321_5")]
+    partial class _5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -374,6 +377,9 @@ namespace dotNetStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Nouveau")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Photo1")
                         .HasColumnType("nvarchar(max)");
 
@@ -392,9 +398,6 @@ namespace dotNetStore.Migrations
                     b.Property<decimal?>("PrixAncien")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<bool>("ReductionMax")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("Top")
                         .HasColumnType("bit");
 
@@ -409,17 +412,16 @@ namespace dotNetStore.Migrations
                             BadgeNew = true,
                             BadgeReduction = 30,
                             Categorie = "Ordinateurs",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Ordinateur 1",
+                            Nom = "Ordinateur1",
+                            Nouveau = false,
                             Photo1 = "ordinateur1-1.png",
                             Photo2 = "ordinateur1-2.png",
                             Photo3 = "ordinateur1-1.png",
                             Photo4 = "ordinateur1-4.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = true,
-                            Top = true
+                            Top = false
                         },
                         new
                         {
@@ -427,14 +429,13 @@ namespace dotNetStore.Migrations
                             BadgeNew = false,
                             BadgeReduction = 30,
                             Categorie = "Ordinateurs",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Ordinateur 2",
+                            Nom = "Ordinateur2",
+                            Nouveau = false,
                             Photo1 = "ordinateur2-1.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = false,
-                            Top = true
+                            Top = false
                         },
                         new
                         {
@@ -442,14 +443,13 @@ namespace dotNetStore.Migrations
                             BadgeNew = false,
                             BadgeReduction = 30,
                             Categorie = "Ordinateurs",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Ordinateur 3",
+                            Nom = "Ordinateur3",
+                            Nouveau = false,
                             Photo1 = "ordinateur3-1.png",
                             Photo2 = "ordinateur3-2.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = true,
                             Top = false
                         },
                         new
@@ -458,31 +458,29 @@ namespace dotNetStore.Migrations
                             BadgeNew = true,
                             BadgeReduction = 30,
                             Categorie = "Ordinateurs",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Ordinateur 4",
+                            Nom = "Ordinateur4",
+                            Nouveau = false,
                             Photo1 = "ordinateur4-1.png",
                             Photo2 = "ordinateur4-2.png",
                             Photo3 = "ordinateur4-3.png",
                             Photo4 = "ordinateur4-4.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = false,
-                            Top = true
+                            Top = false
                         },
                         new
                         {
                             Id = 5,
                             BadgeNew = false,
                             Categorie = "Tablettes",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Tablette 1",
+                            Nom = "Tablette1",
+                            Nouveau = false,
                             Photo1 = "tablette1-1.png",
                             Photo2 = "tablette1-2.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = true,
                             Top = false
                         },
                         new
@@ -490,43 +488,40 @@ namespace dotNetStore.Migrations
                             Id = 6,
                             BadgeNew = true,
                             Categorie = "Smartphones",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Smartphone 1",
+                            Nom = "Smartphone1",
+                            Nouveau = false,
                             Photo1 = "smartphone1-1.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = false,
-                            Top = true
+                            Top = false
                         },
                         new
                         {
                             Id = 7,
                             BadgeNew = false,
                             Categorie = "Cameras",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Camera 1",
+                            Nom = "Camera1",
+                            Nouveau = false,
                             Photo1 = "camera1-1.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = false,
-                            Top = true
+                            Top = false
                         },
                         new
                         {
                             Id = 8,
                             BadgeNew = true,
                             Categorie = "Accessories",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Ecouteuses 1",
+                            Nom = "Ecouteuses1",
+                            Nouveau = false,
                             Photo1 = "ecouteuses1-1.png",
                             Photo2 = "ecouteuses1-2.png",
                             Photo3 = "ecouteuses1-3.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = true,
                             Top = false
                         },
                         new
@@ -534,14 +529,13 @@ namespace dotNetStore.Migrations
                             Id = 9,
                             BadgeNew = false,
                             Categorie = "Accessories",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            Nom = "Ecouteuses 2",
+                            Nom = "Ecouteuses2",
+                            Nouveau = false,
                             Photo1 = "ecouteuses2-1.png",
                             Photo2 = "ecouteuses2-2.png",
                             Prix = 980m,
                             PrixAncien = 1000m,
-                            ReductionMax = true,
                             Top = false
                         });
                 });

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using dotNetStore.Data;
 
@@ -11,9 +12,11 @@ using dotNetStore.Data;
 namespace dotNetStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250422233011_1")]
+    partial class _1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,7 +223,7 @@ namespace dotNetStore.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("dotNetStore.Models.CategorieProduit", b =>
+            modelBuilder.Entity("dotNetStore.Models.Categorie", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -228,51 +231,13 @@ namespace dotNetStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Categorie")
+                    b.Property<string>("Nom")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Photo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SousCategorie")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("CategoriesProduits");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Categorie = "Ordinateurs",
-                            SousCategorie = ""
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Categorie = "Tablettes",
-                            SousCategorie = ""
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Categorie = "Smartphones",
-                            SousCategorie = ""
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Categorie = "Cameras",
-                            SousCategorie = ""
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Categorie = "Accessories",
-                            SousCategorie = ""
-                        });
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("dotNetStore.Models.Commande", b =>
@@ -355,11 +320,11 @@ namespace dotNetStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("BadgeNew")
+                    b.Property<bool?>("BadgeNew")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("BadgeReduction")
-                        .HasColumnType("int");
+                    b.Property<bool?>("BadgeReduction")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Categorie")
                         .HasColumnType("nvarchar(max)");
@@ -374,16 +339,10 @@ namespace dotNetStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Photo1")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool?>("Nouveau")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("Photo2")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Photo3")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Photo4")
+                    b.Property<string>("Photo")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Prix")
@@ -392,158 +351,32 @@ namespace dotNetStore.Migrations
                     b.Property<decimal?>("PrixAncien")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<bool>("ReductionMax")
-                        .HasColumnType("bit");
+                    b.Property<string>("SousCategorie")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Top")
+                    b.Property<bool?>("Top")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
 
                     b.ToTable("Produits");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            BadgeNew = true,
-                            BadgeReduction = 30,
-                            Categorie = "Ordinateurs",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Ordinateur 1",
-                            Photo1 = "ordinateur1-1.png",
-                            Photo2 = "ordinateur1-2.png",
-                            Photo3 = "ordinateur1-1.png",
-                            Photo4 = "ordinateur1-4.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = true,
-                            Top = true
-                        },
-                        new
-                        {
-                            Id = 2,
-                            BadgeNew = false,
-                            BadgeReduction = 30,
-                            Categorie = "Ordinateurs",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Ordinateur 2",
-                            Photo1 = "ordinateur2-1.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = false,
-                            Top = true
-                        },
-                        new
-                        {
-                            Id = 3,
-                            BadgeNew = false,
-                            BadgeReduction = 30,
-                            Categorie = "Ordinateurs",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Ordinateur 3",
-                            Photo1 = "ordinateur3-1.png",
-                            Photo2 = "ordinateur3-2.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = true,
-                            Top = false
-                        },
-                        new
-                        {
-                            Id = 4,
-                            BadgeNew = true,
-                            BadgeReduction = 30,
-                            Categorie = "Ordinateurs",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Ordinateur 4",
-                            Photo1 = "ordinateur4-1.png",
-                            Photo2 = "ordinateur4-2.png",
-                            Photo3 = "ordinateur4-3.png",
-                            Photo4 = "ordinateur4-4.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = false,
-                            Top = true
-                        },
-                        new
-                        {
-                            Id = 5,
-                            BadgeNew = false,
-                            Categorie = "Tablettes",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Tablette 1",
-                            Photo1 = "tablette1-1.png",
-                            Photo2 = "tablette1-2.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = true,
-                            Top = false
-                        },
-                        new
-                        {
-                            Id = 6,
-                            BadgeNew = true,
-                            Categorie = "Smartphones",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Smartphone 1",
-                            Photo1 = "smartphone1-1.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = false,
-                            Top = true
-                        },
-                        new
-                        {
-                            Id = 7,
-                            BadgeNew = false,
-                            Categorie = "Cameras",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Camera 1",
-                            Photo1 = "camera1-1.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = false,
-                            Top = true
-                        },
-                        new
-                        {
-                            Id = 8,
-                            BadgeNew = true,
-                            Categorie = "Accessories",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Ecouteuses 1",
-                            Photo1 = "ecouteuses1-1.png",
-                            Photo2 = "ecouteuses1-2.png",
-                            Photo3 = "ecouteuses1-3.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = true,
-                            Top = false
-                        },
-                        new
-                        {
-                            Id = 9,
-                            BadgeNew = false,
-                            Categorie = "Accessories",
-                            Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            IsDeleted = false,
-                            Nom = "Ecouteuses 2",
-                            Photo1 = "ecouteuses2-1.png",
-                            Photo2 = "ecouteuses2-2.png",
-                            Prix = 980m,
-                            PrixAncien = 1000m,
-                            ReductionMax = true,
-                            Top = false
-                        });
+            modelBuilder.Entity("dotNetStore.Models.SousCategorie", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SousCategories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
