@@ -58,7 +58,7 @@
 								<div class="cart-list">
 									<div class="product-widget">
 										<div class="product-img">
-											<img src="./img/product01.png" alt="">
+											<img src="./img/produits/seed/ordinateur1-1.png" alt="">
 										</div>
 										<div class="product-body">
 											<h3 class="product-name"><a href="#">product name goes here</a></h3>
@@ -69,7 +69,7 @@
 
 									<div class="product-widget">
 										<div class="product-img">
-											<img src="./img/product02.png" alt="">
+											<img src="./img/produits/seed/ecouteuses1-1.png" alt="">
 										</div>
 										<div class="product-body">
 											<h3 class="product-name"><a href="#">product name goes here</a></h3>
@@ -118,10 +118,10 @@
 			<!-- NAV -->
 			<ul class="main-nav nav navbar-nav">
 				<li><NavLink href="/" style="font-weight:bold;">Accueil</NavLink></li>
-				<li><NavLink href="/store">Tous les produits</NavLink></li>
+				<li><NavLink href="/Filtres">Tous les produits</NavLink></li>
 				@foreach (var c in Categories)
 				{
-					var link = "/Store?categorie=" + @c.Categorie;
+					var link = "/Filtres?categorie=" + @c.Categorie;
 					<li><NavLink href="@link" activeClass="active">@c.Categorie</NavLink></li>
 				}
 			</ul>

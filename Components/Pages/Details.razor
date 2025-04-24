@@ -1,6 +1,19 @@
-﻿@page "/Product/{Id:int}"
+﻿@page "/Details/{Id:int}"
 @rendermode InteractiveServer
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime _JSRuntime
+@inject NavigationManager _NavManager
+
+<HeadContent>
+	<style>
+		.product .product-img img {
+		cursor: pointer;
+		transition: transform 0.3s ease;
+		}
+		.product .product-img img:hover {
+		transform: scale(1.1);
+		}
+	</style>
+</HeadContent>
 
 <!-- SECTION -->
 <div class="section">
@@ -44,25 +57,25 @@
 					@if (Produit.Photo1!=null)
 					{
 						<div class="product-preview">
-							<img src="./img/produits/@Produit.Photo1" alt="@Produit.Nom + photo1">
+							<img src="./img/produits/@Produit.Photo1" alt="@Produit.Nom + photo1" style="cursor: pointer;">
 						</div>
 					}
 					@if (Produit.Photo2!=null)
 					{
 						<div class="product-preview">
-							<img src="./img/produits/@Produit.Photo2" alt="@Produit.Nom + photo2">
+							<img src="./img/produits/@Produit.Photo2" alt="@Produit.Nom + photo2" style="cursor: pointer;">
 						</div>
 					}
 					@if (Produit.Photo3!=null)
 					{
 						<div class="product-preview">
-							<img src="./img/produits/@Produit.Photo3" alt="@Produit.Nom + photo3">
+							<img src="./img/produits/@Produit.Photo3" alt="@Produit.Nom + photo3" style="cursor: pointer;">
 						</div>
 					}
 					@if (Produit.Photo4 != null)
 					{
 						<div class="product-preview">
-							<img src="./img/produits/@Produit.Photo4" alt="@Produit.Nom + photo4">
+							<img src="./img/produits/@Produit.Photo4" alt="@Produit.Nom + photo4" style="cursor: pointer;">
 						</div>
 					}
 				</div>
@@ -104,6 +117,8 @@
 </div>
 <!-- /SECTION -->
 
+@if (RelatedProducts.Count>1)
+{
 <!-- SECTION -->
 <div class="section">
 	<!-- container -->
@@ -113,8 +128,8 @@
 
 			<!-- section title -->
 			<div class="col-md-12">
-				<div class="section-title">
-					<h3 class="title">Réductions Folles !!</h3>
+				<div class="section-title text-center">
+					<h3 class="title">Produits associés</h3>
 				</div>
 			</div>
 			<!-- /section title -->
@@ -126,11 +141,12 @@
 						<div id="tab1" class="tab-pane active">
 							<div class="products-slick" data-nav="#slick-nav-1">
 								<!-- product -->
-								@foreach (var p in ProduitsRelies)
+								@foreach (var p in RelatedProducts)
 								{
+									if(Id==p.Id){continue;}
 									<div class="product">
 										<div class="product-img">
-											<img src="./img/produits/@p.Photo1" alt="@p.Nom">
+											<img @onclick="()=>GoToDetails(p.Id)" src="./img/produits/@p.Photo1" alt="@p.Nom">
 											<div class="product-label">
 												@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale''>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
 												@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
@@ -161,9 +177,20 @@
 	<!-- /container -->
 </div>
 <!-- /SECTION -->
+}
+
 @code {
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		await JSRuntime.InvokeVoidAsync("initializeScripts");
+		await _JSRuntime.InvokeVoidAsync("initializeScripts");
+		if (firstRender)
+		{
+			await _JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+		}
+	}
+
+	private void GoToDetails(int id)
+	{
+		_NavManager.NavigateTo($"/Details/{id}");
 	}
 }
