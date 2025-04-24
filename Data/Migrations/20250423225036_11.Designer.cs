@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using dotNetStore.Data;
 
@@ -11,9 +12,11 @@ using dotNetStore.Data;
 namespace dotNetStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250423225036_11")]
+    partial class _11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -401,7 +404,7 @@ namespace dotNetStore.Migrations
                     b.Property<bool>("BadgeNew")
                         .HasColumnType("bit");
 
-                    b.Property<int>("BadgeReduction")
+                    b.Property<int?>("BadgeReduction")
                         .HasColumnType("int");
 
                     b.Property<int?>("CategorieId")
@@ -543,7 +546,6 @@ namespace dotNetStore.Migrations
                             Autre2 = true,
                             Autre3 = true,
                             BadgeNew = false,
-                            BadgeReduction = 0,
                             CategorieId = 2,
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
@@ -563,7 +565,6 @@ namespace dotNetStore.Migrations
                             Autre2 = true,
                             Autre3 = false,
                             BadgeNew = true,
-                            BadgeReduction = 0,
                             CategorieId = 3,
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
@@ -582,7 +583,6 @@ namespace dotNetStore.Migrations
                             Autre2 = true,
                             Autre3 = false,
                             BadgeNew = false,
-                            BadgeReduction = 0,
                             CategorieId = 4,
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
@@ -601,7 +601,6 @@ namespace dotNetStore.Migrations
                             Autre2 = false,
                             Autre3 = true,
                             BadgeNew = true,
-                            BadgeReduction = 0,
                             CategorieId = 5,
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
@@ -622,7 +621,6 @@ namespace dotNetStore.Migrations
                             Autre2 = true,
                             Autre3 = true,
                             BadgeNew = false,
-                            BadgeReduction = 0,
                             CategorieId = 5,
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,

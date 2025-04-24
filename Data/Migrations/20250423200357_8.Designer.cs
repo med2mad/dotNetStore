@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using dotNetStore.Data;
 
@@ -11,9 +12,11 @@ using dotNetStore.Data;
 namespace dotNetStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250423200357_8")]
+    partial class _8
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -347,40 +350,6 @@ namespace dotNetStore.Migrations
                     b.ToTable("Factures");
                 });
 
-            modelBuilder.Entity("dotNetStore.Models.Marque", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Marques");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Nom = "SAMSUNG"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Nom = "LG"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Nom = "SONY"
-                        });
-                });
-
             modelBuilder.Entity("dotNetStore.Models.Produit", b =>
                 {
                     b.Property<int>("Id")
@@ -401,11 +370,11 @@ namespace dotNetStore.Migrations
                     b.Property<bool>("BadgeNew")
                         .HasColumnType("bit");
 
-                    b.Property<int>("BadgeReduction")
+                    b.Property<int?>("BadgeReduction")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CategorieId")
-                        .HasColumnType("int");
+                    b.Property<string>("Categorie")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -413,8 +382,8 @@ namespace dotNetStore.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("MarqueId")
-                        .HasColumnType("int");
+                    b.Property<string>("Marque")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nom")
                         .IsRequired()
@@ -446,10 +415,6 @@ namespace dotNetStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategorieId");
-
-                    b.HasIndex("MarqueId");
-
                     b.ToTable("Produits");
 
                     b.HasData(
@@ -461,10 +426,9 @@ namespace dotNetStore.Migrations
                             Autre3 = true,
                             BadgeNew = true,
                             BadgeReduction = 30,
-                            CategorieId = 1,
+                            Categorie = "Ordinateurs",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 1,
                             Nom = "Ordinateur 1",
                             Photo1 = "seed/ordinateur1-1.png",
                             Photo2 = "seed/ordinateur1-2.png",
@@ -483,10 +447,9 @@ namespace dotNetStore.Migrations
                             Autre3 = false,
                             BadgeNew = false,
                             BadgeReduction = 30,
-                            CategorieId = 1,
+                            Categorie = "Ordinateurs",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 2,
                             Nom = "Ordinateur 2",
                             Photo1 = "seed/ordinateur2-1.png",
                             Prix = 980m,
@@ -502,10 +465,9 @@ namespace dotNetStore.Migrations
                             Autre3 = true,
                             BadgeNew = false,
                             BadgeReduction = 30,
-                            CategorieId = 1,
+                            Categorie = "Ordinateurs",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 3,
                             Nom = "Ordinateur 3",
                             Photo1 = "seed/ordinateur3-1.png",
                             Photo2 = "seed/ordinateur3-2.png",
@@ -522,10 +484,9 @@ namespace dotNetStore.Migrations
                             Autre3 = true,
                             BadgeNew = true,
                             BadgeReduction = 30,
-                            CategorieId = 1,
+                            Categorie = "Ordinateurs",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 1,
                             Nom = "Ordinateur 4",
                             Photo1 = "seed/ordinateur4-1.png",
                             Photo2 = "seed/ordinateur4-2.png",
@@ -543,11 +504,9 @@ namespace dotNetStore.Migrations
                             Autre2 = true,
                             Autre3 = true,
                             BadgeNew = false,
-                            BadgeReduction = 0,
-                            CategorieId = 2,
+                            Categorie = "Tablettes",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 2,
                             Nom = "Tablette 1",
                             Photo1 = "seed/tablette1-1.png",
                             Photo2 = "seed/tablette1-2.png",
@@ -563,11 +522,9 @@ namespace dotNetStore.Migrations
                             Autre2 = true,
                             Autre3 = false,
                             BadgeNew = true,
-                            BadgeReduction = 0,
-                            CategorieId = 3,
+                            Categorie = "Smartphones",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 3,
                             Nom = "Smartphone 1",
                             Photo1 = "seed/smartphone1-1.png",
                             Prix = 980m,
@@ -582,11 +539,9 @@ namespace dotNetStore.Migrations
                             Autre2 = true,
                             Autre3 = false,
                             BadgeNew = false,
-                            BadgeReduction = 0,
-                            CategorieId = 4,
+                            Categorie = "Cameras",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 1,
                             Nom = "Camera 1",
                             Photo1 = "seed/camera1-1.png",
                             Prix = 980m,
@@ -601,11 +556,9 @@ namespace dotNetStore.Migrations
                             Autre2 = false,
                             Autre3 = true,
                             BadgeNew = true,
-                            BadgeReduction = 0,
-                            CategorieId = 5,
+                            Categorie = "Accessories",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 2,
                             Nom = "Ecouteuses 1",
                             Photo1 = "seed/ecouteuses1-1.png",
                             Photo2 = "seed/ecouteuses1-2.png",
@@ -622,11 +575,9 @@ namespace dotNetStore.Migrations
                             Autre2 = true,
                             Autre3 = true,
                             BadgeNew = false,
-                            BadgeReduction = 0,
-                            CategorieId = 5,
+                            Categorie = "Accessories",
                             Description = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             IsDeleted = false,
-                            MarqueId = 3,
                             Nom = "Ecouteuses 2",
                             Photo1 = "seed/ecouteuses2-1.png",
                             Photo2 = "seed/ecouteuses2-2.png",
@@ -705,31 +656,9 @@ namespace dotNetStore.Migrations
                     b.Navigation("Produit");
                 });
 
-            modelBuilder.Entity("dotNetStore.Models.Produit", b =>
-                {
-                    b.HasOne("dotNetStore.Models.CategorieProduit", "Categorie")
-                        .WithMany()
-                        .HasForeignKey("CategorieId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("dotNetStore.Models.Marque", "Marque")
-                        .WithMany("Produits")
-                        .HasForeignKey("MarqueId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Categorie");
-
-                    b.Navigation("Marque");
-                });
-
             modelBuilder.Entity("dotNetStore.Models.Facture", b =>
                 {
                     b.Navigation("Commandes");
-                });
-
-            modelBuilder.Entity("dotNetStore.Models.Marque", b =>
-                {
-                    b.Navigation("Produits");
                 });
 
             modelBuilder.Entity("dotNetStore.Models.Produit", b =>

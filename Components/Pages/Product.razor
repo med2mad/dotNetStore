@@ -1,4 +1,4 @@
-﻿@page "/Product"
+﻿@page "/Product/{Id:int}"
 @rendermode InteractiveServer
 @inject IJSRuntime JSRuntime
 
@@ -11,53 +11,71 @@
 			<!-- Product main img -->
 			<div class="col-md-5 col-md-push-2">
 				<div id="product-main-img">
-					<div class="product-preview">
-						<img src="./img/product01.png" alt="">
-					</div>
-
-					<div class="product-preview">
-						<img src="./img/product03.png" alt="">
-					</div>
-
-					<div class="product-preview">
-						<img src="./img/product06.png" alt="">
-					</div>
-
-					<div class="product-preview">
-						<img src="./img/product08.png" alt="">
-					</div>
+					@if (Produit.Photo1!=null)
+					{
+						<div class="product-preview">
+							<img src="./img/produits/@Produit.Photo1" alt="@Produit.Nom + photo1">
+						</div>
+					}
+					@if (Produit.Photo2 != null)
+					{
+						<div class="product-preview">
+							<img src="./img/produits/@Produit.Photo2" alt="@Produit.Nom + photo2">
+						</div>
+					}
+					@if (Produit.Photo3 != null)
+					{
+						<div class="product-preview">
+							<img src="./img/produits/@Produit.Photo3" alt="@Produit.Nom + photo3">
+						</div>
+					}
+					@if (Produit.Photo4 != null)
+					{
+						<div class="product-preview">
+							<img src="./img/produits/@Produit.Photo4" alt="@Produit.Nom + photo4">
+						</div>
+					}
 				</div>
 			</div>
 			<!-- /Product main img -->
 			<!-- Product thumb imgs -->
 			<div class="col-md-2  col-md-pull-5">
 				<div id="product-imgs">
-					<div class="product-preview">
-						<img src="./img/product01.png" alt="">
-					</div>
-
-					<div class="product-preview">
-						<img src="./img/product03.png" alt="">
-					</div>
-
-					<div class="product-preview">
-						<img src="./img/product06.png" alt="">
-					</div>
-
-					<div class="product-preview">
-						<img src="./img/product08.png" alt="">
-					</div>
+					@if (Produit.Photo1!=null)
+					{
+						<div class="product-preview">
+							<img src="./img/produits/@Produit.Photo1" alt="@Produit.Nom + photo1">
+						</div>
+					}
+					@if (Produit.Photo2!=null)
+					{
+						<div class="product-preview">
+							<img src="./img/produits/@Produit.Photo2" alt="@Produit.Nom + photo2">
+						</div>
+					}
+					@if (Produit.Photo3!=null)
+					{
+						<div class="product-preview">
+							<img src="./img/produits/@Produit.Photo3" alt="@Produit.Nom + photo3">
+						</div>
+					}
+					@if (Produit.Photo4 != null)
+					{
+						<div class="product-preview">
+							<img src="./img/produits/@Produit.Photo4" alt="@Produit.Nom + photo4">
+						</div>
+					}
 				</div>
 			</div>
 			<!-- /Product thumb imgs -->
 			<!-- Product details -->
 			<div class="col-md-5">
 				<div class="product-details">
-					<h2 class="product-name">product name goes here</h2>
+					<h2 class="product-name">@Produit.Nom</h2>
 					<div>
-						<h3 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h3>
+						<h3 class="product-price">@Produit.Prix DH <del class="product-old-price">@Produit.PrixAncien DH</del></h3>
 					</div>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+					<p>@Produit.Description</p>
 
 					<div class="add-to-cart">
 						<div class="qty-label">
@@ -73,8 +91,7 @@
 
 					<ul class="product-links">
 						<li>Category:</li>
-						<li><a href="#">Headphones</a></li>
-						<li><a href="#">Accessories</a></li>
+						<li><a href="#">@Produit.Categorie?.Categorie</a></li>
 					</ul>
 				</div>
 			</div>
@@ -86,104 +103,64 @@
 	<!-- /container -->
 </div>
 <!-- /SECTION -->
-<!-- Section -->
+
+<!-- SECTION -->
 <div class="section">
 	<!-- container -->
 	<div class="container">
 		<!-- row -->
 		<div class="row">
 
+			<!-- section title -->
 			<div class="col-md-12">
-				<div class="section-title text-center">
-					<h3 class="title">Related Products</h3>
+				<div class="section-title">
+					<h3 class="title">Réductions Folles !!</h3>
 				</div>
 			</div>
-
-			<!-- product -->
-			<div class="col-md-3 col-xs-6">
-				<div class="product">
-					<div class="product-img">
-						<img src="./img/product01.png" alt="">
-						<div class="product-label">
-							<span class="sale">-30%</span>
+			<!-- /section title -->
+			<!-- Products tab & slick -->
+			<div class="col-md-12">
+				<div class="row">
+					<div class="products-tabs">
+						<!-- tab -->
+						<div id="tab1" class="tab-pane active">
+							<div class="products-slick" data-nav="#slick-nav-1">
+								<!-- product -->
+								@foreach (var p in ProduitsRelies)
+								{
+									<div class="product">
+										<div class="product-img">
+											<img src="./img/produits/@p.Photo1" alt="@p.Nom">
+											<div class="product-label">
+												@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale''>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
+												@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
+											</div>
+										</div>
+										<div class="product-body">
+											<p class="product-category">@p.Categorie?.Categorie</p>
+											<h3 class="product-name"><a href="#">@p.Nom</a></h3>
+											<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
+										</div>
+										<div class="add-to-cart">
+											<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+										</div>
+									</div>
+								}
+								<!-- /product -->
+							</div>
+							<div id="slick-nav-1" class="products-slick-nav"></div>
 						</div>
-					</div>
-					<div class="product-body">
-						<p class="product-category">Category</p>
-						<h3 class="product-name"><a href="#">product name goes here</a></h3>
-						<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-					</div>
-					<div class="add-to-cart">
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+						<!-- /tab -->
 					</div>
 				</div>
 			</div>
-			<!-- /product -->
-			<!-- product -->
-			<div class="col-md-3 col-xs-6">
-				<div class="product">
-					<div class="product-img">
-						<img src="./img/product02.png" alt="">
-						<div class="product-label">
-							<span class="new">NEW</span>
-						</div>
-					</div>
-					<div class="product-body">
-						<p class="product-category">Category</p>
-						<h3 class="product-name"><a href="#">product name goes here</a></h3>
-						<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-					</div>
-					<div class="add-to-cart">
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-					</div>
-				</div>
-			</div>
-			<!-- /product -->
-
-			<div class="clearfix visible-sm visible-xs"></div>
-
-			<!-- product -->
-			<div class="col-md-3 col-xs-6">
-				<div class="product">
-					<div class="product-img">
-						<img src="./img/product03.png" alt="">
-					</div>
-					<div class="product-body">
-						<p class="product-category">Category</p>
-						<h3 class="product-name"><a href="#">product name goes here</a></h3>
-						<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-					</div>
-					<div class="add-to-cart">
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-					</div>
-				</div>
-			</div>
-			<!-- /product -->
-			<!-- product -->
-			<div class="col-md-3 col-xs-6">
-				<div class="product">
-					<div class="product-img">
-						<img src="./img/product04.png" alt="">
-					</div>
-					<div class="product-body">
-						<p class="product-category">Category</p>
-						<h3 class="product-name"><a href="#">product name goes here</a></h3>
-						<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-					</div>
-					<div class="add-to-cart">
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-					</div>
-				</div>
-			</div>
-			<!-- /product -->
-
+			<!-- Products tab & slick -->
 		</div>
 		<!-- /row -->
 	</div>
 	<!-- /container -->
 </div>
-<!-- /Section -->
-
+<!-- /SECTION -->
 @code {
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
