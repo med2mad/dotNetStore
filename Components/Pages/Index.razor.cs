@@ -12,7 +12,6 @@ public partial class Index
     public List<Produit> Produits { get; set; }
     public List<Produit> ReductionsFolles { get; set; }
     public List<Produit> TopVentes { get; set; }
-
     public List<Produit> Autres1 { get; set; }
     public List<Produit> Autres2 { get; set; }
     public List<Produit> Autres3 { get; set; }

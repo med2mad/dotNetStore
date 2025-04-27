@@ -6,4 +6,6 @@ public class CategorieProduit
     public string Categorie { get; set; }
     public string? SousCategorie { get; set; }
     public string? Photo { get; set; }
+
+    public ICollection<Produit>? Produits { get; set; }
 }

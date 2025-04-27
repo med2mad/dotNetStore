@@ -1,6 +1,25 @@
-﻿@page "/Filtres"
+﻿@page "/Filtres/{CategorieId:int?}/{MarqueId:int?}/{SearchText?}"
 @rendermode InteractiveServer
-@inject IJSRuntime JSRuntime
+
+<HeadContent>  
+	<style>
+		.product .product-img img{
+		cursor:pointer;
+		transition: transform 0.3s ease;
+		}
+		.product .product-img img:hover {
+		transform: scale(1.1);
+		}
+
+		.product-widget .product-img img {
+		cursor: pointer;
+		}
+
+		select{
+		border: solid 1px #cbcbcb !important;
+		}
+	</style>
+</HeadContent>
 
 <!-- SECTION -->
 <div class="section">
@@ -14,60 +33,20 @@
 				<div class="aside">
 					<h3 class="aside-title">Categories</h3>
 					<div class="checkbox-filter">
-
-						<div class="input-checkbox">
-							<input type="checkbox" id="category-1">
-							<label for="category-1">
-								<span></span>
-								Laptops
-								<small>(120)</small>
-							</label>
-						</div>
-
-						<div class="input-checkbox">
-							<input type="checkbox" id="category-2">
-							<label for="category-2">
-								<span></span>
-								Smartphones
-								<small>(740)</small>
-							</label>
-						</div>
-
-						<div class="input-checkbox">
-							<input type="checkbox" id="category-3">
-							<label for="category-3">
-								<span></span>
-								Cameras
-								<small>(1450)</small>
-							</label>
-						</div>
-
-						<div class="input-checkbox">
-							<input type="checkbox" id="category-4">
-							<label for="category-4">
-								<span></span>
-								Accessories
-								<small>(578)</small>
-							</label>
-						</div>
-
-						<div class="input-checkbox">
-							<input type="checkbox" id="category-5">
-							<label for="category-5">
-								<span></span>
-								Laptops
-								<small>(120)</small>
-							</label>
-						</div>
-
-						<div class="input-checkbox">
-							<input type="checkbox" id="category-6">
-							<label for="category-6">
-								<span></span>
-								Smartphones
-								<small>(740)</small>
-							</label>
-						</div>
+						@if (Categories != null)
+						{
+							@foreach(var c in Categories)
+							{
+								<div class="input-checkbox">
+									<input type="checkbox" value="@c.Categorie" @onchange="@(e => ToggleCategory(c.Id, (bool)e.Value))" checked="@SelectedCategories.Contains(c.Id)" id="categorie-@c.Id">
+									<label for="categorie-@c.Id">
+										<span></span>
+										@c.Categorie
+										<small>(@(c.Produits?.Count ?? 0))</small>
+									</label>
+								</div>
+							}
+						}
 					</div>
 				</div>
 				<!-- /aside Widget -->
@@ -94,92 +73,42 @@
 				<div class="aside">
 					<h3 class="aside-title">Brand</h3>
 					<div class="checkbox-filter">
-						<div class="input-checkbox">
-							<input type="checkbox" id="brand-1">
-							<label for="brand-1">
-								<span></span>
-								SAMSUNG
-								<small>(578)</small>
-							</label>
-						</div>
-						<div class="input-checkbox">
-							<input type="checkbox" id="brand-2">
-							<label for="brand-2">
-								<span></span>
-								LG
-								<small>(125)</small>
-							</label>
-						</div>
-						<div class="input-checkbox">
-							<input type="checkbox" id="brand-3">
-							<label for="brand-3">
-								<span></span>
-								SONY
-								<small>(755)</small>
-							</label>
-						</div>
-						<div class="input-checkbox">
-							<input type="checkbox" id="brand-4">
-							<label for="brand-4">
-								<span></span>
-								SAMSUNG
-								<small>(578)</small>
-							</label>
-						</div>
-						<div class="input-checkbox">
-							<input type="checkbox" id="brand-5">
-							<label for="brand-5">
-								<span></span>
-								LG
-								<small>(125)</small>
-							</label>
-						</div>
-						<div class="input-checkbox">
-							<input type="checkbox" id="brand-6">
-							<label for="brand-6">
-								<span></span>
-								SONY
-								<small>(755)</small>
-							</label>
-						</div>
+						@if (Marques != null)
+						{
+							@foreach (var m in Marques)
+							{
+								<div class="input-checkbox">
+									<input type="checkbox" @onchange="@(e => ToggleMarque(m.Id, (bool)e.Value))" checked="@SelectedMarques.Contains(m.Id)" id="marque-@m.Id">
+									<label for="marque-@m.Id">
+										<span></span>
+										@m.Nom
+										<small>(@(m.Produits?.Count ?? 0))</small>
+									</label>
+								</div>
+							}
+						}
 					</div>
 				</div>
 				<!-- /aside Widget -->
 				<!-- aside Widget -->
 				<div class="aside">
 					<h3 class="aside-title">Top selling</h3>
-					<div class="product-widget">
-						<div class="product-img">
-							<img src="./img/product01.png" alt="">
-						</div>
-						<div class="product-body">
-							<p class="product-category">Category</p>
-							<h3 class="product-name"><a href="#">product name goes here</a></h3>
-							<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-						</div>
-					</div>
-
-					<div class="product-widget">
-						<div class="product-img">
-							<img src="./img/product02.png" alt="">
-						</div>
-						<div class="product-body">
-							<p class="product-category">Category</p>
-							<h3 class="product-name"><a href="#">product name goes here</a></h3>
-							<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-						</div>
-					</div>
-
-					<div class="product-widget">
-						<div class="product-img">
-							<img src="./img/product03.png" alt="">
-						</div>
-						<div class="product-body">
-							<p class="product-category">Category</p>
-							<h3 class="product-name"><a href="#">product name goes here</a></h3>
-							<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-						</div>
-					</div>
+					@if (TopVentes != null)
+					{
+						@foreach (var p in TopVentes)
+						{
+							<div class="product-widget">
+								<div class="product-img">
+									<img @onclick="()=>GoToDetails(p.Id)" src="./img/produits/@p.Photo1" alt="@p.Nom">
+								</div>
+								<div class="product-body">
+									<p class="product-category">@p.Categorie?.Categorie</p>
+									<h3 class="product-name"><a href="/Product/@p.Id">@p.Nom</a></h3>
+									<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
+								</div>
+							</div>
+						}
+					}
 				</div>
 				<!-- /aside Widget -->
 			</div>
@@ -190,18 +119,31 @@
 				<div class="store-filter clearfix">
 					<div class="store-sort">
 						<label>
-							Sort By:
-							<select class="input-select">
-								<option value="0">Popular</option>
-								<option value="1">Position</option>
+							Sort By
+							<select @onchange="@(e => OnSortChange((string)e.Value))" class="input-select">
+								<option value=""></option>
+								<option value="Nom">Nom</option>
+								<option value="Prix">Prix</option>
+								<option value="Categorie">Catégorie</option>
+								<option value="Marque">Marque</option>
 							</select>
 						</label>
-
 						<label>
-							Show:
-							<select class="input-select">
-								<option value="0">20</option>
-								<option value="1">50</option>
+							Ordre
+							<select @onchange="@(e => OnOrderChange((string)e.Value))" class="input-select">
+								<option value="ASC">Croissant</option>
+								<option value="DESC ">Décroissant </option>
+							</select>
+						</label>
+						<label>
+							Show
+							<select @onchange="@(e => OnChangeCount((string)e.Value))" class="input-select">
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="15">15</option>
+								<option value="30">30</option>
+								<option value="60">60</option>
 							</select>
 						</label>
 					</div>
@@ -210,179 +152,39 @@
 				<!-- store products -->
 				<div class="row">
 					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product01.png" alt="">
-								<div class="product-label">
-									<span class="sale">-30%</span>
-									<span class="new">NEW</span>
+					@if (ProduitsFiltres == null)
+					{
+						<p>Chargement...</p>
+					}
+					else if (!ProduitsFiltres.Any())
+					{
+						<h1 style="color:#D10024">Aucun Article !</h1>
+					}
+					else
+					{
+						@foreach (var p in ProduitsFiltres)
+						{
+							<div class="col-md-4 col-xs-6">
+								<div class="product">
+									<div class="product-img">
+										<img @onclick="()=>GoToDetails(p.Id)" src="./img/produits/@p.Photo1" alt="@p.Nom">
+										<div class="product-label">
+											@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale'>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
+											@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
+										</div>
+									</div>
+									<div class="product-body">
+										<p class="product-category">@p.Categorie?.Categorie</p>
+										<h3 class="product-name"><a href="/Product/@p.Id">@p.Nom</a></h3>
+										<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
+									</div>
+									<div class="add-to-cart">
+										<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+									</div>
 								</div>
 							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product02.png" alt="">
-								<div class="product-label">
-									<span class="new">NEW</span>
-								</div>
-							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-
-					<div class="clearfix visible-sm visible-xs"></div>
-
-					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product03.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-
-					<div class="clearfix visible-lg visible-md"></div>
-
-					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product04.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-
-					<div class="clearfix visible-sm visible-xs"></div>
-
-					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product05.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product06.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-
-					<div class="clearfix visible-lg visible-md visible-sm visible-xs"></div>
-
-					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product07.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product08.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
-					<!-- /product -->
-
-					<div class="clearfix visible-sm visible-xs"></div>
-
-					<!-- product -->
-					<div class="col-md-4 col-xs-6">
-						<div class="product">
-							<div class="product-img">
-								<img src="./img/product09.png" alt="">
-							</div>
-							<div class="product-body">
-								<p class="product-category">Category</p>
-								<h3 class="product-name"><a href="#">product name goes here</a></h3>
-								<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
-							</div>
-							<div class="add-to-cart">
-								<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-							</div>
-						</div>
-					</div>
+						}
+					}
 					<!-- /product -->
 				</div>
 				<!-- /store products -->
@@ -390,11 +192,24 @@
 				<div class="store-filter clearfix">
 					<span class="store-qty">Showing 20-100 products</span>
 					<ul class="store-pagination">
-						<li class="active">1</li>
-						<li><a href="#">2</a></li>
-						<li><a href="#">3</a></li>
-						<li><a href="#">4</a></li>
-						<li><a href="#"><i class="fa fa-angle-right"></i></a></li>
+						@{string link = "";}
+						@for (int i = 1; i <= Pages; i++)
+						{
+							link = "/Filtres/0/" + @i;
+							var ii = i;
+							<li @onclick="()=>{OnChangePage(ii);}" class="@(CurrentPage == i ? "active" : "")">
+								@if (CurrentPage != i)
+								{
+									<a href="javascript:void(0);">@i</a>
+								}
+								else
+									@i
+							</li>
+						}
+						@{
+							int x = CurrentPage == Pages ? CurrentPage : CurrentPage + 1;
+						}
+						<li @onclick="()=>{OnChangePage(x);}"><a href="javascript:void(0);"><i class="fa fa-angle-right"></i></a></li>
 					</ul>
 				</div>
 				<!-- /store bottom filter -->
@@ -407,9 +222,75 @@
 </div>
 <!-- /SECTION -->
 
+
+
+
 @code {
-	protected override async Task OnAfterRenderAsync(bool firstRender)
+	[Inject] NavigationManager _NavigationManager { get; set; } = default!;
+
+	private HashSet<int> SelectedCategories { get; set; } = new HashSet<int>();
+	private HashSet<int> SelectedMarques { get; set; } = new HashSet<int>();
+	private int SelectedPrixMin { get; set; } = 0;
+	private int SelectedPrixMax { get; set; }
+	private string Sort { get; set; } = "";
+	private string Order { get; set; } = "ASC";
+	private int PerPage { get; set; } = 2;
+	private int Pages { get; set; }
+	public int CurrentPage { get; set; } = 1;
+
+	private void GoToDetails(int id)
 	{
-		await JSRuntime.InvokeVoidAsync("initializeScripts");
+		_NavigationManager.NavigateTo($"/Details/{id}");
 	}
+
+	private void ToggleCategory(int categoryId, bool isSelected)
+	{
+		if (isSelected)
+			SelectedCategories.Add(categoryId);
+		else
+			SelectedCategories.Remove(categoryId);
+
+		FiltreProduits();
+	}
+	private void ToggleMarque(int marqueId, bool isSelected)
+	{
+		if (isSelected)
+			SelectedMarques.Add(marqueId);
+		else
+			SelectedMarques.Remove(marqueId);
+
+		FiltreProduits();
+	}
+	private void OnSortChange(string sort)
+	{
+		Sort = sort;
+		FiltreProduits();
+	}
+	private void OnOrderChange(string order)
+	{
+		Order = order;
+		FiltreProduits();
+	}
+	private void OnChangeCount(string count)
+	{
+		PerPage = int.Parse(count);
+		FiltreProduits();
+	}
+	private void OnChangePage(int page)
+	{
+		CurrentPage = page;
+		FiltreProduits();
+	}
+	[JSInvokable]
+	public Task OnPrixChange(double value, int handle)
+	{
+		if (handle == 0)
+			SelectedPrixMin = (int)value;
+		else
+			SelectedPrixMax = (int)value;
+
+		FiltreProduits();
+		return Task.CompletedTask;
+	}
+
 }

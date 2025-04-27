@@ -1,7 +1,7 @@
 (function ($) {
     "use strict";
 
-    window.initializeScripts = () => {
+    window.initializeScripts = (max, dotNetHelper) => {
         // Mobile Nav toggle
         $('.menu-toggle > a').off('click').on('click', function (e) {
             e.preventDefault();
@@ -139,11 +139,11 @@
         var priceInputMin = document.getElementById('price-min');
 
         if (priceInputMax && priceInputMin) {
-            priceInputMax.addEventListener('change', function () {
+            priceInputMax.addEventListener('input', function () {
                 updatePriceSlider($(this).parent(), this.value);
             });
 
-            priceInputMin.addEventListener('change', function () {
+            priceInputMin.addEventListener('input', function () {
                 updatePriceSlider($(this).parent(), this.value);
             });
         }
@@ -160,16 +160,18 @@
         var priceSlider = document.getElementById('price-slider');
         if (priceSlider && !priceSlider.noUiSlider) {
             noUiSlider.create(priceSlider, {
-                start: [1, 999],
+                start: [1, max],
                 connect: true,
                 step: 1,
                 range: {
                     'min': 1,
-                    'max': 999
+                    'max': max
                 }
             });
 
             priceSlider.noUiSlider.on('update', function (values, handle) {
+                dotNetHelper.invokeMethodAsync('OnPrixChange', parseFloat(values[handle]), handle);
+
                 var value = values[handle];
                 if (handle) {
                     priceInputMax.value = value;

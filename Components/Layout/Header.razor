@@ -1,4 +1,6 @@
-﻿
+﻿@rendermode InteractiveServer
+@inject NavigationManager _NavManager
+
 <!-- HEADER -->
 <header>
 	<!-- TOP HEADER -->
@@ -30,15 +32,15 @@
 				<!-- SEARCH BAR -->
 				<div class="col-md-6">
 					<div class="header-search">
-						<form>
-							<select class="input-select">
+						<form @onsubmit="GoToFiltres" @onsubmit:preventDefault>
+							<select @bind="MarqueId" class="input-select">
 								<option value="0" style="text-align:center;">Tous ...</option>
-								@foreach (var c in Categories)
+								@foreach (var m in Marques)
 								{
-									<option value="@c.Categorie">@c.Categorie</option>
+									<option value="@m.Id">@m.Nom</option>
 								}
 							</select>
-							<input class="input" placeholder="Search here">
+							<input @bind="Text" @bind:event="oninput" class="input" placeholder="Recherche">
 							<button class="search-btn">Search</button>
 						</form>
 					</div>
@@ -121,7 +123,7 @@
 				<li><NavLink href="/Filtres">Tous les produits</NavLink></li>
 				@foreach (var c in Categories)
 				{
-					var link = "/Filtres?categorie=" + @c.Categorie;
+					var link = "/Filtres/" + @c.Id;
 					<li><NavLink href="@link" activeClass="active">@c.Categorie</NavLink></li>
 				}
 			</ul>
@@ -132,3 +134,13 @@
 	<!-- /container -->
 </nav>
 <!-- /NAVIGATION -->
+
+@code {
+	string Text = "";
+	int MarqueId = 0;
+
+	private void GoToFiltres()
+	{
+		_NavManager.NavigateTo($"/Filtres/0/{MarqueId}/{Text}");
+	}
+}
