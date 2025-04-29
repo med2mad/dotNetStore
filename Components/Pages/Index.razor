@@ -1,20 +1,22 @@
 ﻿@page "/"
+@using dotNetStore.Models
 @rendermode InteractiveServer
 @inject IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
+@inject CartService Cart
 
 <HeadContent>  
 	<style>
 		.product .product-img img{
-			cursor:pointer;
-			transition: transform 0.3s ease;
+		cursor:pointer;
+		transition: transform 0.3s ease;
 		}
 		.product .product-img img:hover {
-			transform: scale(1.1);
+		transform: scale(1.1);
 		}
 
 		.product-widget .product-img img {
-			cursor: pointer;
+		cursor: pointer;
 		}
 	</style>
 </HeadContent>
@@ -95,23 +97,23 @@
 								<!-- product -->
 								@foreach (var p in ReductionsFolles)
 								{
-									<div class="product">
-										<div class="product-img">
-											<img @onclick="()=>GoToDetails(p.Id)" src="./img/produits/@p.Photo1" alt="@p.Nom">
-											<div class="product-label">
-												@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale'>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
-												@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
-											</div>
-										</div>
-										<div class="product-body">
-											<p class="product-category">@p.Categorie?.Categorie</p>
-											<h3 class="product-name"><a href="/Product/@p.Id">@p.Nom</a></h3>
-											<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
-										</div>
-										<div class="add-to-cart">
-											<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+								<div class="product">
+									<div @onclick="()=>GoToDetails(p.Id)" class="product-img">
+										<img src="./img/produits/@p.Photo1" alt="@p.Nom">
+										<div class="product-label">
+											@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale'>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
+											@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
 										</div>
 									</div>
+									<div class="product-body">
+										<p class="product-category">@p.Categorie?.Categorie</p>
+										<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
+										<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
+									</div>
+									<div class="add-to-cart">
+											<button @onclick="()=>AddToCart(p)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+									</div>
+								</div>
 								}
 								<!-- /product -->
 							</div>
@@ -153,9 +155,10 @@
 								<!-- product -->
 								@foreach (var p in TopVentes)
 								{
+									
 									<div class="product">
-										<div class="product-img">
-											<img @onclick="()=>GoToDetails(p.Id)" src="./img/produits/@p.Photo1" alt="@p.Nom">
+										<div @onclick="()=>GoToDetails(p.Id)" class="product-img">
+											<img src="./img/produits/@p.Photo1" alt="@p.Nom">
 											<div class="product-label">
 												@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale'>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
 												@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
@@ -163,11 +166,11 @@
 										</div>
 										<div class="product-body">
 											<p class="product-category">@p.Categorie?.Categorie</p>
-											<h3 class="product-name"><a href="/Product/@p.Id">@p.Nom</a></h3>
+											<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
 											<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
 										</div>
 										<div class="add-to-cart">
-											<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+											<button @onclick="()=>AddToCart(p)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
 										</div>
 									</div>
 								}
@@ -213,7 +216,7 @@
 									</div>
 									<div class="product-body">
 										<p class="product-category">@p.Categorie?.Categorie</p>
-										<h3 class="product-name"><a href="/Product/@p.Id">@p.Nom</a></h3>
+										<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
 										<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
 									</div>
 								</div>
@@ -245,7 +248,7 @@
 									</div>
 									<div class="product-body">
 										<p class="product-category">@p.Categorie?.Categorie</p>
-										<h3 class="product-name"><a href="/Product/@p.Id">@p.Nom</a></h3>
+										<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
 										<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
 									</div>
 								</div>
@@ -279,7 +282,7 @@
 									</div>
 									<div class="product-body">
 										<p class="product-category">@p.Categorie?.Categorie</p>
-										<h3 class="product-name"><a href="/Product/@p.Id">@p.Nom</a></h3>
+										<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
 										<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
 									</div>
 								</div>
@@ -298,9 +301,26 @@
 <!-- /SECTION -->
 
 @code {
+	private bool _slickInitialized = false;
+
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		await _JSRuntime.InvokeVoidAsync("initializeScripts");
+		if (firstRender && !_slickInitialized)
+		{
+			await _JSRuntime.InvokeVoidAsync("initializeScripts");
+		}
+	}
+
+	private void AddToCart(Produit product)
+	{
+		Cart.AddToCart(new CartItem
+		{
+			Id = product.Id,
+			Nom = product.Nom,
+			Prix = product.Prix,
+			Photo = product.Photo1,
+			Qte = 1
+		});
 	}
 
 	private void GoToDetails(int id)

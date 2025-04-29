@@ -1,6 +1,14 @@
 (function ($) {
     "use strict";
 
+    // Handle Js onclick from HTML
+    window.initializeInterop = (dotNetHelper) => {
+        window.dotNetHelper = dotNetHelper;
+    };
+    window.handleButtonClick = (id) => {
+        dotNetHelper.invokeMethodAsync('HandleButtonClickFromJs', id);
+    };
+
     window.initializeScripts = (max, dotNetHelper) => {
         // Mobile Nav toggle
         $('.menu-toggle > a').off('click').on('click', function (e) {
@@ -25,7 +33,7 @@
                     slidesToShow: 4,
                     slidesToScroll: 1,
                     autoplay: true,
-                    infinite: true,
+                    infinite: false,
                     speed: 300,
                     dots: false,
                     arrows: true,
@@ -57,7 +65,7 @@
 
             if (!$this.hasClass('slick-initialized')) {
                 $this.slick({
-                    infinite: true,
+                    infinite: false,
                     autoplay: true,
                     speed: 300,
                     dots: false,
@@ -72,7 +80,7 @@
         // Product Main img Slick
         if (!$('#product-main-img').hasClass('slick-initialized')) {
             $('#product-main-img').slick({
-                infinite: true,
+                infinite: false,
                 speed: 300,
                 dots: false,
                 arrows: true,
@@ -121,7 +129,7 @@
 
             down.off('click').on('click', function () {
                 var value = parseInt($input.val()) - 1;
-                value = value < 1 ? 1 : value;
+                value = value <= 0 ? 0 : value;
                 $input.val(value);
                 $input.change();
                 updatePriceSlider($this, value);
@@ -160,11 +168,11 @@
         var priceSlider = document.getElementById('price-slider');
         if (priceSlider && !priceSlider.noUiSlider) {
             noUiSlider.create(priceSlider, {
-                start: [1, max],
+                start: [0, max],
                 connect: true,
                 step: 1,
                 range: {
-                    'min': 1,
+                    'min': 0,
                     'max': max
                 }
             });

@@ -1,5 +1,9 @@
 ﻿@rendermode InteractiveServer
+@using dotNetStore.Models
 @inject NavigationManager _NavManager
+@inject CartService _Cart
+@inject IJSRuntime _JSRuntime
+@implements IDisposable
 
 <!-- HEADER -->
 <header>
@@ -58,31 +62,23 @@
 							</a>
 							<div class="cart-dropdown">
 								<div class="cart-list">
-									<div class="product-widget">
-										<div class="product-img">
-											<img src="./img/produits/seed/ordinateur1-1.png" alt="">
+									@foreach (var item in _Cart.Items)
+									{
+										<div class="product-widget">
+											<div class="product-img">
+												<img src="./img/produits/@item.Photo" alt="@item.Nom">
+											</div>
+											<div class="product-body">
+												<h3 class="product-name"><a href="/Details/@item.Id">@item.Nom</a></h3>
+												<h4 class="product-price"><span class="qty">@(item.Qte)x</span>@item.Prix DH</h4>
+											</div>
+											<button	onclick="handleButtonClick(@item.Id)" class="delete"><i class="fa fa-close"></i></button>
 										</div>
-										<div class="product-body">
-											<h3 class="product-name"><a href="#">product name goes here</a></h3>
-											<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-										</div>
-										<button class="delete"><i class="fa fa-close"></i></button>
-									</div>
-
-									<div class="product-widget">
-										<div class="product-img">
-											<img src="./img/produits/seed/ecouteuses1-1.png" alt="">
-										</div>
-										<div class="product-body">
-											<h3 class="product-name"><a href="#">product name goes here</a></h3>
-											<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-										</div>
-										<button class="delete"><i class="fa fa-close"></i></button>
-									</div>
+									}
 								</div>
 								<div class="cart-summary">
-									<small>3 Item(s) selected</small>
-									<h5>SUBTOTAL: $2940.00</h5>
+									<small>@_Cart.Items.Count Item(s) selected</small>
+									<h5>SUBTOTAL: @_Cart.Items.Sum(p => p.Prix)</h5>
 								</div>
 								<div class="cart-btns">
 									<a href="#">View Cart</a>
@@ -138,9 +134,39 @@
 @code {
 	string Text = "";
 	int MarqueId = 0;
+	private DotNetObjectReference<Header>? dotNetReference;
 
 	private void GoToFiltres()
 	{
 		_NavManager.NavigateTo($"/Filtres/0/{MarqueId}/{Text}");
+	}
+	private void GoToDetails(int id)
+	{
+		_NavManager.NavigateTo($"/Details/{id}");
+	}
+
+	[JSInvokable]
+	public void HandleButtonClickFromJs(int id)
+	{
+		_Cart.RemoveFromCart(id);
+		StateHasChanged();
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			_Cart.OnCartUpdated += StateHasChanged; // Subscribe to cart updates
+			dotNetReference = DotNetObjectReference.Create(this);
+			await _JSRuntime.InvokeVoidAsync("initializeInterop", dotNetReference);
+		}
+	}
+	public void Dispose()
+	{
+		_Cart.OnCartUpdated -= StateHasChanged; // Unsubscribe to avoid memory leaks
+		if (dotNetReference != null)
+		{
+			dotNetReference?.Dispose();
+			dotNetReference = null;
+		}
 	}
 }

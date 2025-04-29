@@ -19,7 +19,7 @@ public partial class Index
 
     protected override void OnInitialized()
     {
-        Produits = _DbContext.Produits.Include(p=>p.Categorie).Where(p => p.ReductionFolle || p.TopVente || p.Autre1 || p.Autre2 || p.Autre3).ToList();
+        Produits = _DbContext.Produits.Include(p => p.Categorie).Where(p => p.ReductionFolle || p.TopVente || p.Autre1 || p.Autre2 || p.Autre3).ToList();
         ReductionsFolles = Produits.Where(p => p.ReductionFolle).ToList();
         TopVentes = Produits.Where(p => p.TopVente).ToList();
         Autres1 = Produits.Where(p => p.Autre1).ToList();

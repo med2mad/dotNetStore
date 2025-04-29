@@ -1,25 +1,6 @@
 ﻿@page "/Filtres/{CategorieId:int?}/{MarqueId:int?}/{SearchText?}"
 @rendermode InteractiveServer
-
-<HeadContent>  
-	<style>
-		.product .product-img img{
-		cursor:pointer;
-		transition: transform 0.3s ease;
-		}
-		.product .product-img img:hover {
-		transform: scale(1.1);
-		}
-
-		.product-widget .product-img img {
-		cursor: pointer;
-		}
-
-		select{
-		border: solid 1px #cbcbcb !important;
-		}
-	</style>
-</HeadContent>
+@implements IDisposable
 
 <!-- SECTION -->
 <div class="section">
@@ -138,9 +119,6 @@
 						<label>
 							Show
 							<select @onchange="@(e => OnChangeCount((string)e.Value))" class="input-select">
-								<option value="2">2</option>
-								<option value="3">3</option>
-								<option value="4">4</option>
 								<option value="15">15</option>
 								<option value="30">30</option>
 								<option value="60">60</option>
@@ -227,6 +205,7 @@
 
 @code {
 	[Inject] NavigationManager _NavigationManager { get; set; } = default!;
+	private DotNetObjectReference<Filtres>? dotNetReference;
 
 	private HashSet<int> SelectedCategories { get; set; } = new HashSet<int>();
 	private HashSet<int> SelectedMarques { get; set; } = new HashSet<int>();
@@ -292,5 +271,12 @@
 		FiltreProduits();
 		return Task.CompletedTask;
 	}
-
+	public void Dispose()
+	{
+		if (dotNetReference != null)
+		{
+			dotNetReference?.Dispose();
+			dotNetReference = null;
+		}
+	}
 }

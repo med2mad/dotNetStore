@@ -1,0 +1,16 @@
+﻿.product .product-img img {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+    .product .product-img img:hover {
+        transform: scale(1.1);
+    }
+
+.product-widget .product-img img {
+    cursor: pointer;
+}
+
+select {
+    border: solid 1px #cbcbcb !important;
+}

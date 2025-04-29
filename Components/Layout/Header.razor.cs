@@ -16,4 +16,5 @@ public partial class Header
         Categories = _DbContext.CategoriesProduits.ToList();
         Marques = _DbContext.Marques.ToList();
     }
+
 }

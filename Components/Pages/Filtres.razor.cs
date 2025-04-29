@@ -39,7 +39,8 @@ public partial class Filtres
 
             FiltreProduits();
 
-            await _JSRuntime.InvokeVoidAsync("initializeScripts", SelectedPrixMax, DotNetObjectReference.Create(this));
+            dotNetReference = DotNetObjectReference.Create(this);
+            await _JSRuntime.InvokeVoidAsync("initializeScripts", SelectedPrixMax, dotNetReference);
         }
     }
 
