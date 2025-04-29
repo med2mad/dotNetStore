@@ -1,16 +1,19 @@
 ﻿@page "/Details/{Id:int}"
+@using dotNetStore.Models
 @rendermode InteractiveServer
 @inject IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
+@inject CartService _Cart
+@implements IDisposable
 
 <HeadContent>
 	<style>
 		.product .product-img img {
-		cursor: pointer;
-		transition: transform 0.3s ease;
+			cursor: pointer;
+			transition: transform 0.3s ease;
 		}
 		.product .product-img img:hover {
-		transform: scale(1.1);
+			transform: scale(1.1);
 		}
 	</style>
 </HeadContent>
@@ -99,7 +102,7 @@
 								<span class="qty-down">-</span>
 							</div>
 						</div>
-						<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+						<button @onclick="()=>AddToCart(Produit)"  class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
 					</div>
 
 					<ul class="product-links">
@@ -161,7 +164,7 @@
 											<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
 										</div>
 										<div class="add-to-cart">
-											<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+											<button @onclick="()=>AddToCart(p)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
 										</div>
 									</div>
 								}
@@ -183,17 +186,39 @@
 }
 
 @code {
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		await _JSRuntime.InvokeVoidAsync("initializeScripts");
-		if (firstRender)
-		{
-			await _JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
-		}
-	}
-
 	private void GoToDetails(int id)
 	{
 		_NavManager.NavigateTo($"/Details/{id}");
+	}
+	public void AddToCart(Produit p)
+	{
+		_Cart.AddToCart(new CartItem
+		{
+			Id = p.Id,
+			Nom = p.Nom,
+			Prix = p.Prix,
+			Photo = p.Photo1,
+			Qte = 1
+		});
+	}
+
+	private DotNetObjectReference<Details>? dotNetReference;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			dotNetReference = DotNetObjectReference.Create(this);
+			await _JSRuntime.InvokeVoidAsync("initializeScripts", 9999, dotNetReference);
+			await _JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+		}
+	}
+	public void Dispose()
+	{
+		if (dotNetReference != null)
+		{
+			dotNetReference?.Dispose();
+			dotNetReference = null;
+		}
 	}
 }

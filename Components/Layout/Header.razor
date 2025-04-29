@@ -62,19 +62,27 @@
 							</a>
 							<div class="cart-dropdown">
 								<div class="cart-list">
-									@foreach (var item in _Cart.Items)
+									@if (_Cart.Items.Count == 0)
 									{
-										<div class="product-widget">
-											<div class="product-img">
-												<img src="./img/produits/@item.Photo" alt="@item.Nom">
-											</div>
-											<div class="product-body">
-												<h3 class="product-name"><a href="/Details/@item.Id">@item.Nom</a></h3>
-												<h4 class="product-price"><span class="qty">@(item.Qte)x</span>@item.Prix DH</h4>
-											</div>
-											<button	onclick="handleButtonClick(@item.Id)" class="delete"><i class="fa fa-close"></i></button>
-										</div>
+										<p>Vide !</p>
 									}
+									else
+									{
+										@foreach (var item in _Cart.Items)
+										{
+											<div class="product-widget">
+												<div class="product-img">
+													<img src="./img/produits/@item.Photo" alt="@item.Nom">
+												</div>
+												<div class="product-body">
+													<h3 class="product-name"><a href="/Details/@item.Id">@item.Nom</a></h3>
+													<h4 class="product-price"><span class="qty">@(item.Qte)x</span>@item.Prix DH</h4>
+												</div>
+												<button onclick="RemoveFromCart(@item.Id)" class="delete"><i class="fa fa-close"></i></button>
+											</div>
+										}
+									}
+
 								</div>
 								<div class="cart-summary">
 									<small>@_Cart.Items.Count Item(s) selected</small>
@@ -146,7 +154,7 @@
 	}
 
 	[JSInvokable]
-	public void HandleButtonClickFromJs(int id)
+	public void RemoveFromCart(int id)
 	{
 		_Cart.RemoveFromCart(id);
 		StateHasChanged();
@@ -157,7 +165,8 @@
 		{
 			_Cart.OnCartUpdated += StateHasChanged; // Subscribe to cart updates
 			dotNetReference = DotNetObjectReference.Create(this);
-			await _JSRuntime.InvokeVoidAsync("initializeInterop", dotNetReference);
+			await _JSRuntime.InvokeVoidAsync("initializeHeaderInterop", dotNetReference);
+			await _JSRuntime.InvokeVoidAsync("initializeScripts", 9999, dotNetReference);
 		}
 	}
 	public void Dispose()

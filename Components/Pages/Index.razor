@@ -3,7 +3,8 @@
 @rendermode InteractiveServer
 @inject IJSRuntime _JSRuntime
 @inject NavigationManager _NavManager
-@inject CartService Cart
+@inject CartService _Cart
+@implements IDisposable
 
 <HeadContent>  
 	<style>
@@ -97,23 +98,23 @@
 								<!-- product -->
 								@foreach (var p in ReductionsFolles)
 								{
-								<div class="product">
-									<div @onclick="()=>GoToDetails(p.Id)" class="product-img">
-										<img src="./img/produits/@p.Photo1" alt="@p.Nom">
-										<div class="product-label">
-											@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale'>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
-											@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
+									<div class="product">
+										<div onclick="GoToDetails(@p.Id)" class="product-img">
+											<img src="./img/produits/@p.Photo1" alt="@p.Nom">
+											<div class="product-label">
+												@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale'>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
+												@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
+											</div>
+										</div>
+										<div class="product-body">
+											<p class="product-category">@p.Categorie?.Categorie</p>
+											<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
+											<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
+										</div>
+										<div class="add-to-cart">
+											<button onclick="AddToCart(@p.Id)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
 										</div>
 									</div>
-									<div class="product-body">
-										<p class="product-category">@p.Categorie?.Categorie</p>
-										<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
-										<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
-									</div>
-									<div class="add-to-cart">
-											<button @onclick="()=>AddToCart(p)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-									</div>
-								</div>
 								}
 								<!-- /product -->
 							</div>
@@ -155,9 +156,8 @@
 								<!-- product -->
 								@foreach (var p in TopVentes)
 								{
-									
 									<div class="product">
-										<div @onclick="()=>GoToDetails(p.Id)" class="product-img">
+										<div onclick="GoToDetails(@p.Id)" class="product-img">
 											<img src="./img/produits/@p.Photo1" alt="@p.Nom">
 											<div class="product-label">
 												@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale'>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
@@ -170,7 +170,7 @@
 											<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
 										</div>
 										<div class="add-to-cart">
-											<button @onclick="()=>AddToCart(p)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+											<button onclick="AddToCart(@p.Id)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
 										</div>
 									</div>
 								}
@@ -301,30 +301,42 @@
 <!-- /SECTION -->
 
 @code {
-	private bool _slickInitialized = false;
-
-	protected override async Task OnAfterRenderAsync(bool firstRender)
+	[JSInvokable]
+	public void AddToCart(int id)
 	{
-		if (firstRender && !_slickInitialized)
+		Produit P = Produits.FirstOrDefault(p => p.Id == id)!;
+		_Cart.AddToCart(new CartItem
 		{
-			await _JSRuntime.InvokeVoidAsync("initializeScripts");
-		}
-	}
-
-	private void AddToCart(Produit product)
-	{
-		Cart.AddToCart(new CartItem
-		{
-			Id = product.Id,
-			Nom = product.Nom,
-			Prix = product.Prix,
-			Photo = product.Photo1,
+			Id = P.Id,
+			Nom = P.Nom,
+			Prix = P.Prix,
+			Photo = P.Photo1,
 			Qte = 1
 		});
 	}
-
-	private void GoToDetails(int id)
+	[JSInvokable]
+	public void GoToDetails(int id)
 	{
 		_NavManager.NavigateTo($"/Details/{id}");
+	}
+
+	private DotNetObjectReference<Index>? dotNetReference;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			dotNetReference = DotNetObjectReference.Create(this);
+			await _JSRuntime.InvokeVoidAsync("initializeInterop", dotNetReference);
+			await _JSRuntime.InvokeVoidAsync("initializeScripts", 9999, dotNetReference);
+		}
+	}
+	public void Dispose()
+	{
+		if (dotNetReference != null)
+		{
+			dotNetReference?.Dispose();
+			dotNetReference = null;
+		}
 	}
 }

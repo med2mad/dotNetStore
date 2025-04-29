@@ -35,14 +35,16 @@ public partial class Filtres
             if (MarqueId > 0)
                 SelectedMarques.Add(MarqueId);
 
-            SelectedPrixMax = (int)Math.Ceiling(Produits.Max(p => p.Prix) ?? 9999); ;
+            SelectedPrixMax = (int)Math.Ceiling(Produits.Max(p => p.Prix) ?? 9999);
 
             FiltreProduits();
 
             dotNetReference = DotNetObjectReference.Create(this);
+            await _JSRuntime.InvokeVoidAsync("initializeInterop", dotNetReference);
             await _JSRuntime.InvokeVoidAsync("initializeScripts", SelectedPrixMax, dotNetReference);
         }
     }
+
 
     private void FiltreProduits()
     {

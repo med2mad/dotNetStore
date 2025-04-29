@@ -1,14 +1,23 @@
 (function ($) {
     "use strict";
 
-    // Handle Js onclick from HTML
+    window.initializeHeaderInterop = (dotNetHelper) => {
+        window.dotNetHeaderHelper = dotNetHelper;
+    };
     window.initializeInterop = (dotNetHelper) => {
         window.dotNetHelper = dotNetHelper;
     };
-    window.handleButtonClick = (id) => {
-        dotNetHelper.invokeMethodAsync('HandleButtonClickFromJs', id);
-    };
 
+    window.AddToCart = (id) => {
+        dotNetHelper.invokeMethodAsync('AddToCart', id);
+    };
+    window.RemoveFromCart = (id) => {
+        dotNetHeaderHelper.invokeMethodAsync('RemoveFromCart', id);
+    };
+     window.GoToDetails = (id) => {
+        dotNetHelper.invokeMethodAsync('GoToDetails', id);
+    };
+    
     window.initializeScripts = (max, dotNetHelper) => {
         // Mobile Nav toggle
         $('.menu-toggle > a').off('click').on('click', function (e) {
@@ -33,10 +42,13 @@
                     slidesToShow: 4,
                     slidesToScroll: 1,
                     autoplay: true,
-                    infinite: false,
+                    infinite: true,
                     speed: 300,
                     dots: false,
                     arrows: true,
+                    draggable: false,      // Disables mouse/touch dragging
+                    swipe: false,          // Disables swipe gestures
+                    touchMove: false,       // Disables touch movement
                     appendArrows: $nav ? $nav : false,
                     responsive: [
                         {
@@ -65,11 +77,14 @@
 
             if (!$this.hasClass('slick-initialized')) {
                 $this.slick({
-                    infinite: false,
+                    infinite: true,
                     autoplay: true,
                     speed: 300,
                     dots: false,
                     arrows: true,
+                    draggable: false,      // Disables mouse/touch dragging
+                    swipe: false,          // Disables swipe gestures
+                    touchMove: false,       // Disables touch movement
                     appendArrows: $nav ? $nav : false,
                 });
             }
@@ -80,7 +95,7 @@
         // Product Main img Slick
         if (!$('#product-main-img').hasClass('slick-initialized')) {
             $('#product-main-img').slick({
-                infinite: false,
+                infinite: true,
                 speed: 300,
                 dots: false,
                 arrows: true,
