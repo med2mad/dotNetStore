@@ -9,11 +9,11 @@
 <HeadContent>
 	<style>
 		.product .product-img img {
-			cursor: pointer;
-			transition: transform 0.3s ease;
+		cursor: pointer;
+		transition: transform 0.3s ease;
 		}
 		.product .product-img img:hover {
-			transform: scale(1.1);
+		transform: scale(1.1);
 		}
 	</style>
 </HeadContent>
@@ -97,12 +97,10 @@
 						<div class="qty-label">
 							Qté
 							<div class="input-number">
-								<input type="number">
-								<span class="qty-up">+</span>
-								<span class="qty-down">-</span>
+								<input @bind="qte" type="number">
 							</div>
 						</div>
-						<button @onclick="()=>AddToCart(Produit)"  class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+						<button @onclick="()=>AddToCart(Produit.Id)"  class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
 					</div>
 
 					<ul class="product-links">
@@ -125,81 +123,88 @@
 
 @if (RelatedProducts.Count>1)
 {
-<!-- SECTION -->
-<div class="section">
-	<!-- container -->
-	<div class="container">
-		<!-- row -->
-		<div class="row">
+	<!-- SECTION -->
+	<div class="section">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
 
-			<!-- section title -->
-			<div class="col-md-12">
-				<div class="section-title text-center">
-					<h3 class="title">Produits associés</h3>
-				</div>
-			</div>
-			<!-- /section title -->
-			<!-- Products tab & slick -->
-			<div class="col-md-12">
-				<div class="row">
-					<div class="products-tabs">
-						<!-- tab -->
-						<div id="tab1" class="tab-pane active">
-							<div class="products-slick" data-nav="#slick-nav-1">
-								<!-- product -->
-								@foreach (var p in RelatedProducts)
-								{
-									if(Id==p.Id){continue;}
-									<div class="product">
-										<div class="product-img">
-											<img @onclick="()=>GoToDetails(p.Id)" src="./img/produits/@p.Photo1" alt="@p.Nom">
-											<div class="product-label">
-												@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale''>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
-												@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
-											</div>
-										</div>
-										<div class="product-body">
-											<p class="product-category">@p.Categorie?.Categorie</p>
-											<h3 class="product-name"><a href="#">@p.Nom</a></h3>
-											<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
-										</div>
-										<div class="add-to-cart">
-											<button @onclick="()=>AddToCart(p)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
-										</div>
-									</div>
-								}
-								<!-- /product -->
-							</div>
-							<div id="slick-nav-1" class="products-slick-nav"></div>
-						</div>
-						<!-- /tab -->
+				<!-- section title -->
+				<div class="col-md-12">
+					<div class="section-title text-center">
+						<h3 class="title">Produits similaires</h3>
 					</div>
 				</div>
+				<!-- /section title -->
+				<!-- Products tab & slick -->
+				<div class="col-md-12">
+					<div class="row">
+						<div class="products-tabs">
+							<!-- tab -->
+							<div id="tab1" class="tab-pane active">
+								<div class="products-slick" data-nav="#slick-nav-1">
+									<!-- product -->
+									@foreach (var p in RelatedProducts)
+									{
+										if(Id==p.Id){continue;}
+										<div class="product">
+											<div onclick="GoToDetails(@p.Id)" class="product-img">
+												<img src="./img/produits/@p.Photo1" alt="@p.Nom">
+												<div class="product-label">
+													@((MarkupString)(p.BadgeReduction > 0 ? $"<span class='sale'>-{Math.Abs(p.BadgeReduction)}%</span>" : ""))
+													@((MarkupString)(p.BadgeNew ? "<span class='new'>NEW</span>" : ""))
+												</div>
+											</div>
+											<div class="product-body">
+												<p class="product-category">@p.Categorie?.Categorie</p>
+												<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
+												<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
+											</div>
+										</div>
+									}
+									<!-- /product -->
+								</div>
+								<div id="slick-nav-1" class="products-slick-nav"></div>
+							</div>
+							<!-- /tab -->
+						</div>
+					</div>
+				</div>
+				<!-- Products tab & slick -->
 			</div>
-			<!-- Products tab & slick -->
+			<!-- /row -->
 		</div>
-		<!-- /row -->
+		<!-- /container -->
 	</div>
-	<!-- /container -->
-</div>
-<!-- /SECTION -->
+	<!-- /SECTION -->
 }
 
 @code {
-	private void GoToDetails(int id)
+	private int qte = 1;
+	[JSInvokable]
+	public async Task AddToCart(int id)
+	{
+		if (await _JSRuntime.InvokeAsync<bool>("AlertifyConfirm", "Ajouter cet article au panier ?"))
+		{
+			Produit P = RelatedProducts.FirstOrDefault(p => p.Id == id)!;
+			_Cart.AddToCart(new CartItem
+			{
+				ProduitId = P.Id,
+				Nom = P.Nom,
+				Photo = P.Photo1,
+				Prix = P.Prix ?? 0,
+				Total = (P.Prix ?? 0) * qte,
+				PrixShipping = (P.PrixShipping ?? 0) * qte,
+				Qte = qte
+			});
+			qte = 1;
+		}
+	}
+	[JSInvokable]
+	public void GoToDetails(int id)
 	{
 		_NavManager.NavigateTo($"/Details/{id}");
-	}
-	public void AddToCart(Produit p)
-	{
-		_Cart.AddToCart(new CartItem
-		{
-			Id = p.Id,
-			Nom = p.Nom,
-			Prix = p.Prix,
-			Photo = p.Photo1,
-			Qte = 1
-		});
 	}
 
 	private DotNetObjectReference<Details>? dotNetReference;
@@ -210,6 +215,7 @@
 		{
 			dotNetReference = DotNetObjectReference.Create(this);
 			await _JSRuntime.InvokeVoidAsync("initializeScripts", 9999, dotNetReference);
+			await _JSRuntime.InvokeVoidAsync("initializeInterop", dotNetReference);
 			await _JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
 		}
 	}

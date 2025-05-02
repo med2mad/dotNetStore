@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace dotNetStore.Models;
 
@@ -9,6 +9,7 @@ public class Produit : ISoftDeletable
     public required string Nom { get; set; }
     public decimal? Prix { get; set; }
     public decimal? PrixAncien { get; set; }
+    public decimal? PrixShipping { get; set; }
     public string? Description { get; set; }
     public bool ReductionFolle { get; set; } = false;
     public bool TopVente { get; set; } = false;

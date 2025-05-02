@@ -1,0 +1,12 @@
+﻿
+/*------------------------ added style ------------------------*/
+.alertify .ajs-header {
+    background-color: #D10024 !important;
+    color: white !important;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.alertify .ajs-dialog {
+    max-width: 300px !important;
+}

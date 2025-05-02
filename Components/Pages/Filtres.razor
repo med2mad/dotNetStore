@@ -87,7 +87,7 @@
 								</div>
 								<div class="product-body">
 									<p class="product-category">@p.Categorie?.Categorie</p>
-									<h3 class="product-name"><a href="/Product/@p.Id">@p.Nom</a></h3>
+									<h3 class="product-name"><a href="/Details/@p.Id">@p.Nom</a></h3>
 									<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
 								</div>
 							</div>
@@ -122,6 +122,7 @@
 						<label>
 							Show
 							<select @onchange="@(e => OnChangeCount((string)e.Value))" class="input-select">
+								<option value="3">3</option>
 								<option value="15">15</option>
 								<option value="30">30</option>
 								<option value="60">60</option>
@@ -220,17 +221,22 @@
 	public int CurrentPage { get; set; } = 1;
 
 	[JSInvokable]
-	public void AddToCart(int id)
+	public async Task AddToCart(int id)
 	{
-		Produit P = Produits.FirstOrDefault(p => p.Id == id)!;
-		Cart.AddToCart(new CartItem
-		{
-			Id = P.Id,
-			Nom = P.Nom,
-			Prix = P.Prix,
-			Photo = P.Photo1,
-			Qte = 1
-		});
+		if (await _JSRuntime.InvokeAsync<bool>("AlertifyConfirm", "Ajouter cet article au panier ?"))
+		{ 
+			Produit P = Produits.FirstOrDefault(p => p.Id == id)!;
+			Cart.AddToCart(new CartItem
+			{
+				ProduitId = P.Id,
+				Nom = P.Nom,
+				Photo = P.Photo1,
+				Prix = P.Prix ?? 0,
+				Total = P.Prix ?? 0,
+				PrixShipping = P.PrixShipping ?? 0,
+				Qte = 1
+			});
+		}
 	}
 	[JSInvokable]
 	public void GoToDetails(int id)

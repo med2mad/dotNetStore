@@ -1,4 +1,10 @@
 ﻿@page "/Checkout"
+@using dotNetStore.Data
+@using dotNetStore.Models
+@rendermode InteractiveServer
+@inject CartService _Cart
+@inject ApplicationDbContext _DbContext
+@inject IJSRuntime _JSRuntime
 
 <!-- SECTION -->
 <div class="section">
@@ -14,16 +20,16 @@
 						<h3 class="title">Billing address</h3>
 					</div>
 					<div class="form-group">
-						<input class="input" type="text" name="name" placeholder="Name">
+						<input @bind="nomClient" class="input" type="text" placeholder="Name" required>
 					</div>
 					<div class="form-group">
-						<input class="input" type="tel" name="tel" placeholder="Telephone">
+						<input @bind="telephone" class="input" type="tel" placeholder="Telephone" required>
 					</div>
 					<div class="form-group">
-						<input class="input" type="email" name="email" placeholder="Email">
+						<input @bind="adresse" class="input" type="text" placeholder="Address" required>
 					</div>
 					<div class="form-group">
-						<input class="input" type="text" name="address" placeholder="Address">
+						<input @bind="email" class="input" type="email" placeholder="Email" required>
 					</div>
 				</div>
 				<!-- /Billing Details -->
@@ -40,25 +46,24 @@
 						<div><strong>TOTAL</strong></div>
 					</div>
 					<div class="order-products">
-						<div class="order-col">
-							<div>1x Product Name Goes Here</div>
-							<div>$980.00</div>
-						</div>
-						<div class="order-col">
-							<div>2x Product Name Goes Here</div>
-							<div>$980.00</div>
-						</div>
+						@foreach (var p in _Cart.Items)
+						{
+							<div class="order-col">
+								<div>@(p.Qte)x @p.Nom</div>
+								<div>@p.Total DH</div>
+							</div>
+						}
 					</div>
 					<div class="order-col">
 						<div>Shipping</div>
-						<div><strong>FREE</strong></div>
+						<div><strong>@_Cart.Items.Sum(i=>i.PrixShipping)</strong></div>
 					</div>
 					<div class="order-col">
 						<div><strong>TOTAL</strong></div>
-						<div><strong class="order-total">$2940.00</strong></div>
+						<div><strong class="order-total">@(_Cart.Items.Sum(p => p.Total) + _Cart.Items.Sum(i => i.PrixShipping)) DH</strong></div>
 					</div>
 				</div>
-				<a href="#" class="primary-btn order-submit">Place order</a>
+				<a href="javascript:void(0);" @onclick="order" class="primary-btn order-submit">Place order</a>
 			</div>
 			<!-- /Order Details -->
 		</div>
@@ -67,3 +72,39 @@
 	<!-- /container -->
 </div>
 <!-- /SECTION -->
+
+@code{
+	string nomClient = "";
+	string telephone = "";
+	string adresse = "";
+	string email = "";
+	decimal shipping = 0;
+
+	private async Task order()
+	{
+		if (!(string.IsNullOrWhiteSpace(nomClient) || string.IsNullOrWhiteSpace(telephone) || string.IsNullOrWhiteSpace(adresse) || string.IsNullOrWhiteSpace(email)))
+		{
+			if (await _JSRuntime.InvokeAsync<bool>("AlertifyConfirm", "Confirmation","Commander maintenant ?"))
+			{
+				Facture f = new() { Adresse = adresse, Email = email, NomClient = nomClient, Telephone=telephone, Reference="", PrixShipping = 0, Total = _Cart.Items.Sum(i=>i.Total)};
+				_DbContext.Factures.Add(f);
+				await _DbContext.SaveChangesAsync();
+				f.Reference = $"#{f.Id.ToString("D6")}";
+
+				foreach(var i in _Cart.Items){
+					Commande c = new Commande() { Nom = i.Nom, Prix = i.Prix, Qte = i.Qte, Total = i.Total, PrixShipping=i.PrixShipping, ProduitId = i.ProduitId, FactureId = f.Id };
+					_DbContext.Commandes.Add(c);
+					shipping += c.PrixShipping;
+				}
+				f.PrixShipping = shipping;
+				await _DbContext.SaveChangesAsync();
+
+				_Cart.Items.Clear();
+			}
+		}
+		else
+		{
+			await _JSRuntime.InvokeVoidAsync( "alertify.alert", "Remplissez tous les infos !");
+		}
+	}
+}

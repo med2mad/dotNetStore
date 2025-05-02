@@ -1,5 +1,4 @@
-﻿@rendermode InteractiveServer
-@using dotNetStore.Models
+﻿@using dotNetStore.Models
 @inject NavigationManager _NavManager
 @inject CartService _Cart
 @inject IJSRuntime _JSRuntime
@@ -58,7 +57,7 @@
 							<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
 								<i class="fa fa-shopping-cart"></i>
 								<span>Your Cart</span>
-								<div class="qty">3</div>
+								<div class="qty">@_Cart.Items.Count</div>
 							</a>
 							<div class="cart-dropdown">
 								<div class="cart-list">
@@ -78,19 +77,18 @@
 													<h3 class="product-name"><a href="/Details/@item.Id">@item.Nom</a></h3>
 													<h4 class="product-price"><span class="qty">@(item.Qte)x</span>@item.Prix DH</h4>
 												</div>
-												<button onclick="RemoveFromCart(@item.Id)" class="delete"><i class="fa fa-close"></i></button>
+												<button onclick="RemoveFromCart(@item.ProduitId)" class="delete"><i class="fa fa-close"></i></button>
 											</div>
 										}
 									}
-
 								</div>
 								<div class="cart-summary">
 									<small>@_Cart.Items.Count Item(s) selected</small>
-									<h5>SUBTOTAL: @_Cart.Items.Sum(p => p.Prix)</h5>
+									<h5>SUBTOTAL: @_Cart.Items.Sum(p => p.Total)</h5>
 								</div>
 								<div class="cart-btns">
-									<a href="#">View Cart</a>
-									<a href="#">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
+									<a href="javascript:void(0);" onclick="ClearCart()">Vider le panier</a>
+									<a href="javascript:void(0);" onclick="HeaderGoTo('/Checkout')">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
 								</div>
 							</div>
 						</div>
@@ -152,13 +150,26 @@
 	{
 		_NavManager.NavigateTo($"/Details/{id}");
 	}
+	[JSInvokable]
+	public void HeaderGoTo(string path)
+	{
+		if (_Cart.Items.Count>0)
+			_NavManager.NavigateTo(path);
+	}
 
 	[JSInvokable]
-	public void RemoveFromCart(int id)
+	public void RemoveFromCart(int productId)
 	{
-		_Cart.RemoveFromCart(id);
+		_Cart.RemoveFromCart(productId);
 		StateHasChanged();
 	}
+	[JSInvokable]
+	public void ClearCart()
+	{
+		_Cart.Items.Clear();
+		StateHasChanged();
+	}
+
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)

@@ -7,17 +7,23 @@
     window.initializeInterop = (dotNetHelper) => {
         window.dotNetHelper = dotNetHelper;
     };
-
-    window.AddToCart = (id) => {
-        dotNetHelper.invokeMethodAsync('AddToCart', id);
+   
+    window.ClearCart = () => {
+        dotNetHeaderHelper.invokeMethodAsync('ClearCart');
     };
     window.RemoveFromCart = (id) => {
         dotNetHeaderHelper.invokeMethodAsync('RemoveFromCart', id);
     };
-     window.GoToDetails = (id) => {
+    window.HeaderGoTo = (path) => {
+        dotNetHeaderHelper.invokeMethodAsync('HeaderGoTo', path);
+    };
+    window.AddToCart = (id) => {
+        dotNetHelper.invokeMethodAsync('AddToCart', id);
+    };
+    window.GoToDetails = (id) => {
         dotNetHelper.invokeMethodAsync('GoToDetails', id);
     };
-    
+   
     window.initializeScripts = (max, dotNetHelper) => {
         // Mobile Nav toggle
         $('.menu-toggle > a').off('click').on('click', function (e) {

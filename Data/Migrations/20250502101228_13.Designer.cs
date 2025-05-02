@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using dotNetStore.Data;
 
@@ -11,9 +12,11 @@ using dotNetStore.Data;
 namespace dotNetStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250502101228_13")]
+    partial class _13
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -293,9 +296,6 @@ namespace dotNetStore.Migrations
                     b.Property<decimal>("Prix")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("PrixShipping")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int?>("ProduitId")
                         .HasColumnType("int");
 
@@ -335,12 +335,12 @@ namespace dotNetStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("PrixShipping")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("Reference")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Shipping")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Telephone")
                         .IsRequired()
@@ -445,9 +445,6 @@ namespace dotNetStore.Migrations
                     b.Property<decimal?>("PrixAncien")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal?>("PrixShipping")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<bool>("ReductionFolle")
                         .HasColumnType("bit");
 
@@ -480,9 +477,8 @@ namespace dotNetStore.Migrations
                             Photo2 = "seed/ordinateur1-2.png",
                             Photo3 = "seed/ordinateur1-3.png",
                             Photo4 = "seed/ordinateur1-4.png",
-                            Prix = 900m,
+                            Prix = 980m,
                             PrixAncien = 1000m,
-                            PrixShipping = 90m,
                             ReductionFolle = true,
                             TopVente = true
                         },
@@ -500,9 +496,8 @@ namespace dotNetStore.Migrations
                             MarqueId = 4,
                             Nom = "Ordinateur 2",
                             Photo1 = "seed/ordinateur2-1.png",
-                            Prix = 800m,
+                            Prix = 880m,
                             PrixAncien = 900m,
-                            PrixShipping = 80m,
                             ReductionFolle = false,
                             TopVente = true
                         },
@@ -521,9 +516,8 @@ namespace dotNetStore.Migrations
                             Nom = "Ordinateur 3",
                             Photo1 = "seed/ordinateur3-1.png",
                             Photo2 = "seed/ordinateur3-2.png",
-                            Prix = 700m,
+                            Prix = 780m,
                             PrixAncien = 800m,
-                            PrixShipping = 70m,
                             ReductionFolle = true,
                             TopVente = false
                         },
@@ -544,9 +538,8 @@ namespace dotNetStore.Migrations
                             Photo2 = "seed/ordinateur4-2.png",
                             Photo3 = "seed/ordinateur4-3.png",
                             Photo4 = "seed/ordinateur4-4.png",
-                            Prix = 600m,
+                            Prix = 680m,
                             PrixAncien = 700m,
-                            PrixShipping = 60m,
                             ReductionFolle = false,
                             TopVente = true
                         },
@@ -565,9 +558,8 @@ namespace dotNetStore.Migrations
                             Nom = "Tablette 1",
                             Photo1 = "seed/tablette1-1.png",
                             Photo2 = "seed/tablette1-2.png",
-                            Prix = 500m,
+                            Prix = 580m,
                             PrixAncien = 600m,
-                            PrixShipping = 50m,
                             ReductionFolle = true,
                             TopVente = false
                         },
@@ -588,9 +580,8 @@ namespace dotNetStore.Migrations
                             Photo2 = "seed/smartphone1-2.png",
                             Photo3 = "seed/smartphone1-3.png",
                             Photo4 = "seed/smartphone1-4.png",
-                            Prix = 400m,
+                            Prix = 480m,
                             PrixAncien = 500m,
-                            PrixShipping = 40m,
                             ReductionFolle = false,
                             TopVente = true
                         },
@@ -608,9 +599,8 @@ namespace dotNetStore.Migrations
                             MarqueId = 1,
                             Nom = "Camera 1",
                             Photo1 = "seed/camera1-1.png",
-                            Prix = 300m,
+                            Prix = 380m,
                             PrixAncien = 400m,
-                            PrixShipping = 30m,
                             ReductionFolle = false,
                             TopVente = true
                         },
@@ -630,9 +620,8 @@ namespace dotNetStore.Migrations
                             Photo1 = "seed/ecouteuses1-1.png",
                             Photo2 = "seed/ecouteuses1-2.png",
                             Photo3 = "seed/ecouteuses1-3.png",
-                            Prix = 200m,
+                            Prix = 280m,
                             PrixAncien = 300m,
-                            PrixShipping = 20m,
                             ReductionFolle = true,
                             TopVente = false
                         },
@@ -651,9 +640,8 @@ namespace dotNetStore.Migrations
                             Nom = "Ecouteuses 2",
                             Photo1 = "seed/ecouteuses2-1.png",
                             Photo2 = "seed/ecouteuses2-2.png",
-                            Prix = 100m,
+                            Prix = 180m,
                             PrixAncien = 200m,
-                            PrixShipping = 10m,
                             ReductionFolle = true,
                             TopVente = false
                         });

@@ -16,7 +16,7 @@ public partial class Details
 
     protected override void OnInitialized()
     {
-        Produit = _DbContext.Produits.Include(p => p.Categorie).FirstOrDefault(p=>p.Id== Id);
-        RelatedProducts = _DbContext.Produits.Include(p => p.Categorie).Where(p=>p.Categorie.Categorie==Produit.Categorie.Categorie).ToList();
+        Produit = _DbContext.Produits.Include(p => p.Categorie).FirstOrDefault(p => p.Id == Id);
+        RelatedProducts = _DbContext.Produits.Include(p => p.Categorie).Where(p => p.Categorie.Categorie == Produit.Categorie.Categorie).ToList();
     }
 }

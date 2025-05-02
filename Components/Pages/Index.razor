@@ -302,17 +302,22 @@
 
 @code {
 	[JSInvokable]
-	public void AddToCart(int id)
+	public async Task AddToCart(int id)
 	{
-		Produit P = Produits.FirstOrDefault(p => p.Id == id)!;
-		_Cart.AddToCart(new CartItem
+		if (await _JSRuntime.InvokeAsync<bool>("AlertifyConfirm", "Ajouter cet article au panier ?"))
 		{
-			Id = P.Id,
-			Nom = P.Nom,
-			Prix = P.Prix,
-			Photo = P.Photo1,
-			Qte = 1
-		});
+			Produit P = Produits.FirstOrDefault(p => p.Id == id)!;
+			_Cart.AddToCart(new CartItem
+			{
+				ProduitId = P.Id,
+				Nom = P.Nom,
+				Photo = P.Photo1,
+				Prix = P.Prix ?? 0,
+				Total = P.Prix ?? 0,
+				PrixShipping = P.PrixShipping ?? 0,
+				Qte = 1
+			});
+		}
 	}
 	[JSInvokable]
 	public void GoToDetails(int id)
