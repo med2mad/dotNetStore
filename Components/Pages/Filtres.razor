@@ -1,4 +1,5 @@
-﻿@page "/Filtres/{CategorieId:int?}/{MarqueId:int?}/{SearchText?}"
+﻿@page "/Filtres/{CategorieId:int?}/{MarqueId:int?}/{SearchText?}/{Top:bool?}/{Reduction:bool?}"
+@page "/Filtres/{Top:bool}/{Reduction:bool}"
 @using dotNetStore.Models
 @rendermode InteractiveServer
 @inject CartService Cart
@@ -6,7 +7,7 @@
 @implements IDisposable
 
 <!-- SECTION -->
-<div class="section">
+<div class="section" style="padding-top:0 !important;">
 	<!-- container -->
 	<div class="container">
 		<!-- row -->
@@ -36,7 +37,7 @@
 				<!-- /aside Widget -->
 				<!-- aside Widget -->
 				<div class="aside">
-					<h3 class="aside-title">Price</h3>
+					<h3 class="aside-title">Prix</h3>
 					<div class="price-filter">
 						<div id="price-slider"></div>
 						<div class="input-number price-min">
@@ -55,7 +56,7 @@
 				<!-- /aside Widget -->
 				<!-- aside Widget -->
 				<div class="aside">
-					<h3 class="aside-title">Brand</h3>
+					<h3 class="aside-title">Marque</h3>
 					<div class="checkbox-filter">
 						@if (Marques != null)
 						{
@@ -74,9 +75,32 @@
 					</div>
 				</div>
 				<!-- /aside Widget -->
+
 				<!-- aside Widget -->
 				<div class="aside">
-					<h3 class="aside-title">Top selling</h3>
+					<h3 class="aside-title">Autres</h3>
+					<div class="checkbox-filter">
+						<div class="input-checkbox">
+							<input type="checkbox" @onchange="@(e => ReductionFolle((bool)e.Value))" checked="@SelectedReductions" id="reductionfolle">
+							<label for="reductionfolle">
+								<span></span>
+								Réductions Folles
+							</label>
+						</div>
+						<div class="input-checkbox">
+							<input type="checkbox" @onchange="@(e => TopVente((bool)e.Value))" checked="@SelectedTop" id="topvente">
+							<label for="topvente">
+								<span></span>
+								Top Ventes
+							</label>
+						</div>
+					</div>
+				</div>
+				<!-- /aside Widget -->
+
+				<!-- aside Widget -->
+				<div class="aside">
+					<h3 class="aside-title">Propositions</h3>
 					@if (TopVentes != null)
 					{
 						@foreach (var p in TopVentes)
@@ -103,7 +127,7 @@
 				<div class="store-filter clearfix">
 					<div class="store-sort">
 						<label>
-							Sort By
+							Trier par
 							<select @onchange="@(e => OnSortChange((string)e.Value))" class="input-select">
 								<option value=""></option>
 								<option value="Nom">Nom</option>
@@ -120,8 +144,8 @@
 							</select>
 						</label>
 						<label>
-							Show
-							<select @onchange="@(e => OnChangeCount((string)e.Value))" class="input-select">
+							Afficher
+							<select @onchange="@(e => OnChangeCount((string)e.Value))" value="15" class="input-select">
 								<option value="3">3</option>
 								<option value="15">15</option>
 								<option value="30">30</option>
@@ -161,7 +185,7 @@
 										<h4 class="product-price">@p.Prix DH <del class="product-old-price">@p.PrixAncien DH</del></h4>
 									</div>
 									<div class="add-to-cart">
-										<button onclick="AddToCart(@p.Id)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+										<button onclick="AddToCart(@p.Id)" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> Ajouter au panier</button>
 									</div>
 								</div>
 							</div>
@@ -172,7 +196,7 @@
 				<!-- /store products -->
 				<!-- store bottom filter -->
 				<div class="store-filter clearfix">
-					<span class="store-qty">Showing 20-100 products</span>
+					@* <span class="store-qty">Showing 20-100 products</span> *@
 					<ul class="store-pagination">
 						@{string link = "";}
 						@for (int i = 1; i <= Pages; i++)
@@ -212,6 +236,8 @@
 
 	private HashSet<int> SelectedCategories { get; set; } = new HashSet<int>();
 	private HashSet<int> SelectedMarques { get; set; } = new HashSet<int>();
+	private bool SelectedTop { get; set; } = false;
+	private bool SelectedReductions { get; set; } = false;
 	private int SelectedPrixMin { get; set; } = 0;
 	private int SelectedPrixMax { get; set; }
 	private string Sort { get; set; } = "";
@@ -259,6 +285,24 @@
 			SelectedMarques.Add(marqueId);
 		else
 			SelectedMarques.Remove(marqueId);
+
+		FiltreProduits();
+	}
+	private void TopVente(bool isSelected)
+	{
+		if (isSelected)
+			SelectedTop = true;
+		else
+			SelectedTop = false;
+
+		FiltreProduits();
+	}
+	private void ReductionFolle(bool isSelected)
+	{
+		if (isSelected)
+			SelectedReductions = true;
+		else
+			SelectedReductions = false;
 
 		FiltreProduits();
 	}

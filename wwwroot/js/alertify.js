@@ -50,7 +50,7 @@ alertify.defaults = {
     // language resources 
     glossary: {
         // dialogs default title
-        title: '',
+        title: '.Net Store',
         // ok button text
         ok: 'OK',
         // cancel button text

@@ -17,16 +17,16 @@
 				<!-- Billing Details -->
 				<div class="billing-details">
 					<div class="section-title">
-						<h3 class="title">Billing address</h3>
+						<h3 class="title">Adresse de livraison</h3>
 					</div>
 					<div class="form-group">
-						<input @bind="nomClient" class="input" type="text" placeholder="Name" required>
+						<input @bind="nomClient" class="input" type="text" placeholder="Nom Complet" required>
 					</div>
 					<div class="form-group">
-						<input @bind="telephone" class="input" type="tel" placeholder="Telephone" required>
+						<input @bind="telephone" class="input" type="tel" placeholder="Téléphone" required>
 					</div>
 					<div class="form-group">
-						<input @bind="adresse" class="input" type="text" placeholder="Address" required>
+						<input @bind="adresse" class="input" type="text" placeholder="Adresse" required>
 					</div>
 					<div class="form-group">
 						<input @bind="email" class="input" type="email" placeholder="Email" required>
@@ -38,11 +38,11 @@
 			<!-- Order Details -->
 			<div class="col-md-5 order-details">
 				<div class="section-title text-center">
-					<h3 class="title">Your Order</h3>
+					<h3 class="title">Votre Commande</h3>
 				</div>
 				<div class="order-summary">
 					<div class="order-col">
-						<div><strong>PRODUCT</strong></div>
+						<div><strong>PRODUITS</strong></div>
 						<div><strong>TOTAL</strong></div>
 					</div>
 					<div class="order-products">
@@ -56,14 +56,14 @@
 					</div>
 					<div class="order-col">
 						<div>Shipping</div>
-						<div><strong>@_Cart.Items.Sum(i=>i.PrixShipping)</strong></div>
+						<div><strong>@_Cart.Items.Sum(i=>i.PrixShipping) DH</strong></div>
 					</div>
 					<div class="order-col">
 						<div><strong>TOTAL</strong></div>
 						<div><strong class="order-total">@(_Cart.Items.Sum(p => p.Total) + _Cart.Items.Sum(i => i.PrixShipping)) DH</strong></div>
 					</div>
 				</div>
-				<a href="javascript:void(0);" @onclick="order" class="primary-btn order-submit">Place order</a>
+				<a href="javascript:void(0);" @onclick="order" class="primary-btn order-submit">Commander</a>
 			</div>
 			<!-- /Order Details -->
 		</div>
@@ -84,7 +84,7 @@
 	{
 		if (!(string.IsNullOrWhiteSpace(nomClient) || string.IsNullOrWhiteSpace(telephone) || string.IsNullOrWhiteSpace(adresse) || string.IsNullOrWhiteSpace(email)))
 		{
-			if (await _JSRuntime.InvokeAsync<bool>("AlertifyConfirm", "Confirmation","Commander maintenant ?"))
+			if (await _JSRuntime.InvokeAsync<bool>("AlertifyConfirm", "Placer votre commande maintenant ?"))
 			{
 				Facture f = new() { Adresse = adresse, Email = email, NomClient = nomClient, Telephone=telephone, Reference="", PrixShipping = 0, Total = _Cart.Items.Sum(i=>i.Total)};
 				_DbContext.Factures.Add(f);
@@ -99,7 +99,7 @@
 				f.PrixShipping = shipping;
 				await _DbContext.SaveChangesAsync();
 
-				_Cart.Items.Clear();
+				_Cart.ClearCart();
 			}
 		}
 		else

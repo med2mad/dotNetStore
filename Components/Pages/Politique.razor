@@ -1,0 +1,48 @@
+﻿@page "/Politique"
+@inject IJSRuntime _JSRuntime
+
+<div class="legal-notice">
+    <h3>Mentions légales</h3>
+    <p>Conformément aux dispositions de la loi, nous vous informons des éléments suivants concernant le site <strong>.Net Store</strong>.</p>
+
+    <h4>1. Propriété intellectuelle</h4>
+    <p>
+        Le contenu du site (textes, images, vidéos, logo, etc.) est la propriété exclusive de .Net Store, sauf indication contraire. Toute reproduction ou utilisation sans autorisation préalable est interdite.
+    </p>
+
+    <h4>2. Responsabilité</h4>
+    <p>
+        Nous nous efforçons de fournir un site fiable et à jour. Cependant, .Net Store ne saurait être tenu responsable en cas d’erreurs, d’omissions ou de dysfonctionnements.
+    </p>
+
+    <h4>3. Liens externes</h4>
+    <p>
+        Des liens vers d’autres sites peuvent être proposés. .Net Store n’est pas responsable du contenu de ces sites tiers.
+    </p>
+
+    <h4>4. Contact</h4>
+    <p>
+        Pour toute question concernant ces mentions, vous pouvez nous contacter dans : <NavLink href="/Contacts">Contacts</NavLink>
+    </p>
+
+	<h4>5. Éditeur du site</h4>
+	<p>
+		<strong>Nom commercial :</strong> .Net Store<br>
+		<strong>Responsable de la publication :</strong> [Nom du responsable]<br>
+		<strong>Adresse :</strong> 34 nom boulevard, nom ville, Maroc<br>
+		<strong>Téléphone :</strong> 06 66 66 66 66<br>
+		<strong>Email :</strong> info@gmail.com
+	</p>
+
+</div>
+
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+        }
+    }
+}

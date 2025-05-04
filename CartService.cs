@@ -38,4 +38,10 @@ public class CartService
         Items.RemoveAll(i => i.ProduitId == ProduitId);
         OnCartUpdated?.Invoke();
     }
+
+    public void ClearCart()
+    {
+        Items.Clear();
+        OnCartUpdated?.Invoke();
+    }
 }

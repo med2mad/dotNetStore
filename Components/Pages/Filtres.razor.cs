@@ -14,6 +14,8 @@ public partial class Filtres
     [Parameter] public string SearchText { get; set; } = "";
     [Parameter] public int MarqueId { get; set; }
     [Parameter] public int CategorieId { get; set; }
+    [Parameter] public bool Top { get; set; }
+    [Parameter] public bool Reduction { get; set; }
 
     private List<Produit> Produits { get; set; }
     private List<Produit> ProduitsFiltres { get; set; }
@@ -34,6 +36,10 @@ public partial class Filtres
                 SelectedCategories.Add(CategorieId);
             if (MarqueId > 0)
                 SelectedMarques.Add(MarqueId);
+            if (Top)
+                SelectedTop = true;
+            if (Reduction)
+                SelectedReductions = true;
 
             SelectedPrixMax = (int)Math.Ceiling(Produits.Max(p => p.Prix) ?? 9999);
 
@@ -42,6 +48,7 @@ public partial class Filtres
             dotNetReference = DotNetObjectReference.Create(this);
             await _JSRuntime.InvokeVoidAsync("initializeInterop", dotNetReference);
             await _JSRuntime.InvokeVoidAsync("initializeScripts", SelectedPrixMax, dotNetReference);
+            await _JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
         }
     }
 
@@ -58,6 +65,11 @@ public partial class Filtres
             query = query.Where(p => SelectedMarques.Contains(p.MarqueId ?? 0));
         if (!string.IsNullOrWhiteSpace(SearchText))
             query = query.Where(p => p.Nom.ToLower().Contains(SearchText.ToLower()));
+        if (SelectedTop)
+            query = query.Where(p => p.TopVente);
+        if (SelectedReductions)
+            query = query.Where(p => p.ReductionFolle);
+
         //Sort
         if (Sort == "Nom")
             if (Order == "ASC")
@@ -87,11 +99,12 @@ public partial class Filtres
                 query = query.OrderByDescending(p => p.Id);
         }
 
-        Pages = (int)Math.Ceiling((decimal)query.Count() / PerPage);
-
         ProduitsFiltres = query.Skip((CurrentPage - 1) * PerPage).Take(PerPage).ToList();
+
+        //pagination
+        Pages = (int)Math.Ceiling((decimal)query.Count() / PerPage);
         if (ProduitsFiltres.Count == 0)
-        {//on last pages then increment "Perpage" can return no entries
+        {//set on last pages then increment "Perpage" can return no entries
             CurrentPage = 1;
             ProduitsFiltres = query.Skip((CurrentPage - 1) * PerPage).Take(PerPage).ToList();
         }

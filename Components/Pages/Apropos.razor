@@ -1,0 +1,34 @@
+﻿@page "/Apropos"
+@inject IJSRuntime _JSRuntime
+
+<div class="about-page">
+
+    <h3>À propos de nous</h3>
+    <p>Bienvenue sur <strong>.Net Store</strong>, votre destination de confiance pour tout ce qui concerne les nouvelles technologies.</p>
+
+    <h3>Qui sommes-nous ?</h3>
+    <p>Nous sommes une équipe de passionnés d’informatique, de technologie et d’innovation. Fondé en 2025, <strong>.Net Store</strong> a pour mission de rendre les équipements informatiques accessibles à tous, en combinant qualité et prix compétitifs.</p>
+
+    <h3>Ce que nous proposons</h3>
+    <p>Sur notre boutique en ligne, vous trouverez une large gamme de produits soigneusement sélectionnés :</p>
+
+    <ul>
+        <li>Ordinateurs portables et de bureau</li>
+        <li>Smartphones et tablettes</li>
+        <li>Accessoires informatiques (écouteurs, claviers, souris, hubs USB, etc.)</li>
+        <li>Composants et périphériques (disques durs, cartes graphiques, écrans, etc.)</li>
+    </ul>
+
+    <p>Que vous soyez un particulier à la recherche d’un appareil fiable, ou un professionnel souhaitant équiper votre entreprise, nous avons ce qu’il vous faut.</p>
+
+</div>
+
+@code{
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+        }
+    }
+}

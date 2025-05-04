@@ -1,0 +1,84 @@
+﻿@page "/Contacts"
+@rendermode InteractiveServer
+@inject IJSRuntime _JSRuntime
+
+<div class="site-section bg-light" id="contact-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mb-5">
+                <EditForm method="post" Model="o" OnValidSubmit="OnPost" FormName="uniqueForm">
+                    <div class="form-group row">
+                        <div class="col-md-6 mb-4 mb-lg-0">
+                            <InputText @bind-value="o.nom" class="form-control" placeholder="Nom" required />
+                        </div>
+                        <div class="col-md-6">
+                            <InputText @bind-value="o.prenom" class="form-control" placeholder="Prénom" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-md-6 mb-4 mb-lg-0">
+                            <InputText @bind-value="o.email" class="form-control" placeholder="Adresse Email" required />
+                        </div>
+                        <div class="col-md-6">
+                            <InputText @bind-value="o.tel" class="form-control" placeholder="N Téléphone" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <InputTextArea @bind-value="o.message" id="message" class="form-control" placeholder="Message" cols="30" rows="9" required></InputTextArea>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-md-6 mr-auto">
+                            <input type="submit" class="btn btn-block btn-primary text-white py-3 px-5" value="Envoyer le Message">
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+            <div class="col-lg-4 ml-auto">
+                <div class="bg-white p-3 p-md-5">
+                    <h3 class="text-black mb-4">Contacts</h3>
+                    <ul class="list-unstyled footer-link">
+                        <li class="d-block mb-3">
+                            <span class="d-block text-black">Adresse:</span>
+                            <span>34 nom boulevard , nom ville, Maroc</span>
+                        </li>
+                        <li class="d-block mb-3"><span class="d-block text-black">Tel : </span><span>06 66 66 66 66</span></li>
+                        <li class="d-block mb-3"><span class="d-block text-black">Email : </span><span>info@gmail.com</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    class ModelObject
+    {
+        public string nom { get; set; }
+        public string prenom { get; set; }
+        public string email { get; set; }
+        public string message { get; set; }
+        public string tel { get; set; }
+    }
+    ModelObject o { get; set; } = new();
+
+    public void OnPost()
+    {
+        var x = new EmailSender();
+        x.SendEmailAsync("mohamed.leghdaich@gmail.com", "Contacté par " + o.nom + " " + o.prenom, o.message + "\n\n" + o.email + "\n" + o.tel);
+        o = new();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+        }
+    }
+}
