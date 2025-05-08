@@ -1,0 +1,331 @@
+﻿@page "/admin/marques"
+@layout dotNetStore.Components.Layout.AdminLayout
+@using Microsoft.EntityFrameworkCore
+@using dotNetStore.Data
+@using dotNetStore.Models
+@using dotNetStore.Components.Layout
+@inject ApplicationDbContext Context
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<style>
+    .form-animation {
+        transition: all 0.3s ease-in-out;
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    .form-animation.show {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 2000px;
+    }
+
+    .form-animation input, select, textarea {
+        font-size: 14px !important;
+        border: solid gray 1px !important;
+    }
+
+    .form-animation button {
+        font-size: 14px !important;
+    }
+
+    .card-header button {
+        font-size: 14px !important;
+    }
+</style>
+
+<PageTitle>Gestion des Marques</PageTitle>
+
+<div class="form-animation @(showForm ? "show" : "")">
+    @if (showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">@(currentMarque.Id == 0 ? "Ajouter une marque" : "Modifier la marque")</h5>
+            </div>
+            <div class="card-body">
+                <EditForm Model="@currentMarque" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nom" class="form-label">Nom</label>
+                                <InputText id="nom" @bind-Value="currentMarque.Nom" class="form-control" />
+                                <ValidationMessage For="@(() => currentMarque.Nom)" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Liste des marques</h5>
+        <div>
+            <button class="btn btn-primary btn-sm me-2" @onclick="ShowAddForm">
+                <i class="fas fa-plus me-1"></i> Ajouter
+            </button>
+            <button class="btn btn-danger btn-sm" @onclick="ToggleSearch">
+                <i class="fas @(showSearch ? "fa-times" : "fa-search") me-1"></i> @(showSearch ? "Cacher" : "Rechercher")
+            </button>
+        </div>
+    </div>
+
+    @if (showSearch)
+    {
+        <div class="card-body bg-light">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label class="form-label">Nom de la marque</label>
+                        <input type="text" class="form-control" @bind="searchNom" />
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-danger me-2" @onclick="ApplyFilters">
+                    <i class="fas fa-filter me-1"></i> Appliquer
+                </button>
+                <button class="btn btn-outline-secondary" @onclick="ResetFilters">
+                    <i class="fas fa-broom me-1"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="card-body">
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </div>
+        }
+        else if (filteredMarques == null || !filteredMarques.Any())
+        {
+            <div class="alert alert-info">Aucune marque trouvée</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" style="vertical-align: middle;">
+                    <thead>
+                        <tr>
+                            <th>Marques</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var marque in pagedMarques)
+                        {
+                            <tr>
+                                <td>@marque.Nom</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditMarque(marque)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteMarque(marque)">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <select class="form-select form-select-sm me-2" style="width: auto; display: inline-block;"
+                            @bind="pageSize" @bind:event="oninput">
+                        <option value="5">5 par page</option>
+                        <option value="10">10 par page</option>
+                        <option value="20">20 par page</option>
+                        <option value="50">50 par page</option>
+                    </select>
+                    <Pagination ItemsCount="@totalItems" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="@OnPageChanged" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Marque> marques = new();
+    private List<Marque> filteredMarques = new();
+    private List<Marque> pagedMarques = new();
+    private bool isLoading = true;
+    private bool showForm = false;
+    private bool showSearch = false;
+    private Marque currentMarque = new() { Nom = "" };
+    private string? errorMessage;
+    private int currentPage = 1;
+    private int totalItems = 0;
+
+    // Filtres de recherche
+    private string searchNom = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            marques = await Context.Marques.ToListAsync();
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors du chargement: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        var query = marques.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchNom))
+            query = query.Where(m => m.Nom.Contains(searchNom, StringComparison.OrdinalIgnoreCase));
+
+        filteredMarques = query.ToList();
+        totalItems = filteredMarques.Count;
+        currentPage = 1;
+        UpdatePagedData();
+    }
+
+    private void ResetFilters()
+    {
+        searchNom = string.Empty;
+        ApplyFilters();
+    }
+
+    private void UpdatePagedData()
+    {
+        pagedMarques = filteredMarques
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void OnPageChanged(int page)
+    {
+        currentPage = page;
+        UpdatePagedData();
+    }
+
+    private void ToggleSearch()
+    {
+        showSearch = !showSearch;
+        if (!showSearch) ResetFilters();
+    }
+
+    private void ShowAddForm()
+    {
+        currentMarque = new Marque() { Nom = "" };
+        showForm = true;
+    }
+
+    private void EditMarque(Marque marque)
+    {
+        currentMarque = new Marque
+        {
+            Id = marque.Id,
+            Nom = marque.Nom
+        };
+        showForm = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (currentMarque.Id == 0)
+            {
+                Context.Marques.Add(currentMarque);
+            }
+            else
+            {
+                var existingMarque = await Context.Marques.FindAsync(currentMarque.Id);
+                if (existingMarque != null)
+                {
+                    Context.Entry(existingMarque).CurrentValues.SetValues(currentMarque);
+                }
+            }
+
+            await Context.SaveChangesAsync();
+            showForm = false;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors de l'enregistrement: {ex.Message}";
+        }
+    }
+
+    private void CancelEdit()
+    {
+        showForm = false;
+        currentMarque = new Marque() { Nom = "" };
+    }
+
+    private async Task DeleteMarque(Marque marque)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer la marque \"{marque.Nom}\" ?"))
+        {
+            try
+            {
+                var produitsAssocies = await Context.Produits.AnyAsync(p => p.MarqueId == marque.Id);
+
+                if (produitsAssocies)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "Impossible de supprimer cette marque car elle est utilisée par des produits");
+                    return;
+                }
+
+                Context.Marques.Remove(marque);
+                await Context.SaveChangesAsync();
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Erreur lors de la suppression: {ex.Message}";
+            }
+        }
+    }
+
+    private int _pageSize = 10;
+
+    private int pageSize
+    {
+        get => _pageSize;
+        set
+        {
+            _pageSize = value;
+            UpdatePagedData();
+        }
+    }
+}

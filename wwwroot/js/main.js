@@ -1,6 +1,22 @@
 (function ($) {
     "use strict";
 
+    window.ToggleSidebar = function () {
+        console.log("JS ToggleSidebar called by C#");
+        window.dotNetAdminHelper.invokeMethodAsync('ToggleSidebar');
+
+        return "111"
+    };
+
+
+
+
+
+    window.initializeAdminInterop = (dotNetHelper) => {
+        console.log("zzz");
+        window.dotNetAdminHelper = dotNetHelper;
+        return "zzz";
+    };
     window.initializeHeaderInterop = (dotNetHelper) => {
         window.dotNetHeaderHelper = dotNetHelper;
     };

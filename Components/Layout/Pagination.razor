@@ -1,0 +1,34 @@
+﻿@using Microsoft.AspNetCore.Components
+
+<div class="pagination">
+    @if (TotalPages > 1)
+    {
+        <button class="btn @(CurrentPage == 1 ? "btn-dark disabled" : "btn-danger")"
+        @onclick="() => OnPageChanged.InvokeAsync(CurrentPage-1)" disabled="@(CurrentPage == 1)">
+            &lt;
+        </button>
+
+        @for (int i = 1; i <= TotalPages; i++)
+        {
+            var ii = i;
+            <button class="btn @(i == CurrentPage ? "btn-danger disabled active" : "btn-dark")"
+                    @onclick="() => OnPageChanged.InvokeAsync(ii)">
+                @i
+            </button>
+        }
+
+        <button class="btn @(CurrentPage == TotalPages ? "btn-dark disabled" : "btn-danger")"
+                @onclick="() => OnPageChanged.InvokeAsync(CurrentPage+1)" disabled="@(CurrentPage == TotalPages)">
+            &gt;
+        </button> 
+    }
+</div>
+
+@code {
+    [Parameter] public int ItemsCount { get; set; }
+    [Parameter] public int PageSize { get; set; }
+    [Parameter] public int CurrentPage { get; set; }
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+
+    private int TotalPages => (int)Math.Ceiling((decimal)ItemsCount / PageSize);
+}

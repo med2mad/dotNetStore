@@ -5,6 +5,7 @@
 @inject CartService _Cart
 @inject ApplicationDbContext _DbContext
 @inject IJSRuntime _JSRuntime
+@inject NavigationManager _NavManager
 
 <!-- SECTION -->
 <div class="section">
@@ -100,6 +101,7 @@
 				await _DbContext.SaveChangesAsync();
 
 				_Cart.ClearCart();
+				_NavManager.NavigateTo("/thanks");
 			}
 		}
 		else

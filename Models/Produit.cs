@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace dotNetStore.Models;
@@ -6,10 +7,12 @@ namespace dotNetStore.Models;
 public class Produit : ISoftDeletable
 {
     public int Id { get; set; }
+    [Required(ErrorMessage = "Entrez le Nom")]
+    [StringLength(10, MinimumLength = 3, ErrorMessage = "Entrez de 3 a 10 caractères")]
     public required string Nom { get; set; }
-    public decimal? Prix { get; set; }
-    public decimal? PrixAncien { get; set; }
-    public decimal? PrixShipping { get; set; }
+    public decimal Prix { get; set; } = 0;
+    public decimal PrixAncien { get; set; } = 0;
+    public decimal PrixShipping { get; set; } = 0;
     public string? Description { get; set; }
     public bool ReductionFolle { get; set; } = false;
     public bool TopVente { get; set; } = false;

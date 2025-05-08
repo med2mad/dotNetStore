@@ -1,0 +1,312 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - @PageTitle</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #dc3545;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            overflow-x: hidden;
+            font-size: 14px !important;
+        }
+
+        .sidebar {
+            background-color: var(--dark-color);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+        }
+
+            .sidebar.collapsed {
+                transform: translateX(-250px);
+            }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: var(--primary-color);
+        }
+
+        .sidebar ul.components {
+            padding: 20px 0;
+        }
+
+        .sidebar ul li a {
+            padding: 10px 20px;
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+            .sidebar ul li a:hover {
+                color: white;
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+        .sidebar ul li.active > a {
+            color: white;
+            background-color: var(--primary-color);
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+            min-height: 100vh;
+            width: calc(100% - 250px);
+        }
+
+            .main-content.expanded {
+                margin-left: 0;
+                width: 100%;
+            }
+
+        .navbar-admin {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .navbar-admin .navbar-brand {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0;
+        }
+
+        ul.nav {
+            font-size: large !important;
+        }
+
+        @@media (max-width: 992px) {
+            .sidebar
+
+        {
+            transform: translateX(-100%);
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .navbar-admin .navbar-brand {
+            position: static;
+            transform: none;
+            text-align: center;
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+
+        .navbar-admin .container-fluid {
+            flex-wrap: nowrap;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="sidebar @(sidebarCollapsed ? "collapsed" : "") @(isMobile ? (showSidebar ? "show" : "") : "")" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Tableau de Bord</h3>
+            </div>
+            <ul class="nav flex-column">
+@*                 <li class="nav-item">
+                    <a href="/admin" class="nav-link @GetActiveClass("admin")" @onclick="CloseSidebarIfMobile">
+                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                    </a>
+                </li> *@
+                <li class="nav-item">
+                    <a href="/admin/produits" class="nav-link @GetActiveClass("admin/produits")" @onclick="CloseSidebarIfMobile">
+                        <i class="fas fa-boxes me-2"></i> Produits
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/categories" class="nav-link @GetActiveClass("admin/categories")" @onclick="CloseSidebarIfMobile">
+                        <i class="fas fa-tags me-2"></i> Catégories
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/marques" class="nav-link @GetActiveClass("admin/marques")" @onclick="CloseSidebarIfMobile">
+                        <i class="fas fa-copyright me-2"></i> Marques
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/factures" class="nav-link @GetActiveClass("admin/factures")" @onclick="CloseSidebarIfMobile">
+                        <i class="fas fa-shopping-cart me-2"></i> Commandes
+                    </a>
+                </li>
+@*                 <li class="nav-item">
+                    <a href="/admin/invoices" class="nav-link @GetActiveClass("admin/invoices")" @onclick="CloseSidebarIfMobile">
+                        <i class="fas fa-file-invoice me-2"></i> Factures
+                    </a>
+                </li> *@
+                <li class="nav-item mt-4">
+                    <a href="/" class="nav-link" @onclick="CloseSidebarIfMobile">
+                        <i class="fas fa-arrow-left me-2"></i> Retour au site
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content @(sidebarCollapsed ? "expanded" : "") @(isMobile && showSidebar ? "sidebar-open" : "")" id="main-content">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-admin mb-4">
+                <div class="container-fluid">
+                    <button class="btn btn-dark d-lg-none me-2" type="button" @onclick="ToggleSidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="d-flex align-items-center ms-auto" style="opacity:0;">
+                        <span class="me-3">Admin</span>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" href="#">Profil</a></li>
+                                <li><a class="dropdown-item" href="#">Paramètres</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/logout">Déconnexion</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Page Content -->
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    @if (ShowAddButton)
+                    {
+                        <a href="@AddButtonLink" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>@AddButtonText
+                        </a>
+                    }
+                </div>
+
+                @Body
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+@code {
+    [Parameter]
+    public string PageTitle { get; set; } = "Tableau de Bord";
+
+    [Parameter]
+    public bool ShowAddButton { get; set; } = false;
+
+    [Parameter]
+    public string AddButtonText { get; set; } = "Ajouter";
+
+    [Parameter]
+    public string AddButtonLink { get; set; } = "#";
+
+    private bool sidebarCollapsed = false;
+    private bool showSidebar = false;
+    private bool isMobile = false;
+    private DotNetObjectReference<AdminLayout>? objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("registerResizeListener", objRef);
+            await CheckIfMobile();
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleResize()
+    {
+        await CheckIfMobile();
+        StateHasChanged();
+    }
+
+    private async Task CheckIfMobile()
+    {
+        isMobile = await JSRuntime.InvokeAsync<bool>("isMobileDevice");
+        StateHasChanged();
+    }
+
+    private void ToggleSidebar()
+    {
+        if (isMobile)
+        {
+            showSidebar = !showSidebar;
+        }
+        else
+        {
+            sidebarCollapsed = !sidebarCollapsed;
+        }
+    }
+
+    private void CloseSidebarIfMobile()
+    {
+        if (isMobile)
+        {
+            showSidebar = false;
+        }
+    }
+
+    private string GetActiveClass(string path)
+    {
+        var currentPath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLower();
+        return currentPath.StartsWith(path.ToLower()) ? "active" : "";
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
+    }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; }
+}

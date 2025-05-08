@@ -41,7 +41,7 @@ public partial class Filtres
             if (Reduction)
                 SelectedReductions = true;
 
-            SelectedPrixMax = (int)Math.Ceiling(Produits.Max(p => p.Prix) ?? 9999);
+            SelectedPrixMax = (int)Math.Ceiling(Produits.Max(p => p.Prix));
 
             FiltreProduits();
 
@@ -55,7 +55,7 @@ public partial class Filtres
 
     private void FiltreProduits()
     {
-        IEnumerable<Produit> query = Produits;
+        IEnumerable<Produit> query = _DbContext.Produits;
         //Filter
         query = query.Where(p => p.Prix >= SelectedPrixMin);
         query = query.Where(p => p.Prix <= SelectedPrixMax);
@@ -102,7 +102,7 @@ public partial class Filtres
         ProduitsFiltres = query.Skip((CurrentPage - 1) * PerPage).Take(PerPage).ToList();
 
         //pagination
-        Pages = (int)Math.Ceiling((decimal)query.Count() / PerPage);
+        TotalPages = (int)Math.Ceiling((decimal)query.Count() / PerPage);
         if (ProduitsFiltres.Count == 0)
         {//set on last pages then increment "Perpage" can return no entries
             CurrentPage = 1;

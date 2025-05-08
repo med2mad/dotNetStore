@@ -1,0 +1,595 @@
+﻿@page "/admin/factures"
+@layout dotNetStore.Components.Layout.AdminLayout
+@using Microsoft.EntityFrameworkCore
+@using dotNetStore.Components.Layout
+@using dotNetStore.Data
+@using dotNetStore.Models
+@inject ApplicationDbContext Context
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<style>
+    .form-animation {
+        transition: all 0.3s ease-in-out;
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    .form-animation.show {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 2000px;
+    }
+
+    .card-body td {
+        vertical-align: middle !important;
+    }
+
+    .form-animation input, select, textarea {
+        font-size: 14px !important;
+        border: solid gray 1px !important;
+    }
+
+    .form-animation button {
+        font-size: 14px !important;
+    }
+
+    .card-header button {
+        font-size: 14px !important;
+    }
+
+    .badge-total {
+        background-color: #dc3545;
+        color: white;
+        font-size: 1em;
+        padding: 5px 10px;
+    }
+
+    .commande-details {
+        background-color: #f8f9fa;
+    }
+
+    .commande-row {
+        transition: all 0.3s ease;
+    }
+
+    .commande-row:hover {
+        background-color: #e9ecef;
+    }
+</style>
+
+<PageTitle>Gestion des Factures</PageTitle>
+
+<div class="form-animation @(showForm ? "show" : "")">
+    @if (showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">@(currentFacture.Id == 0 ? "Créer une facture" : "Modifier la facture")</h5>
+            </div>
+            <div class="card-body">
+                <EditForm Model="@currentFacture" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="reference" class="form-label">Référence</label>
+                                <InputText id="reference" @bind-Value="currentFacture.Reference" class="form-control" />
+                                <ValidationMessage For="@(() => currentFacture.Reference)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="nomClient" class="form-label">Nom du Client</label>
+                                <InputText id="nomClient" @bind-Value="currentFacture.NomClient" class="form-control" />
+                                <ValidationMessage For="@(() => currentFacture.NomClient)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="telephone" class="form-label">Téléphone</label>
+                                <InputText id="telephone" @bind-Value="currentFacture.Telephone" class="form-control" />
+                                <ValidationMessage For="@(() => currentFacture.Telephone)" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email (optionnel)</label>
+                                <InputText id="email" @bind-Value="currentFacture.Email" class="form-control" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="adresse" class="form-label">Adresse (optionnel)</label>
+                                <InputTextArea id="adresse" @bind-Value="currentFacture.Adresse" class="form-control" rows="2" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="prixShipping" class="form-label">Frais de Livraison (DH)</label>
+                                <InputNumber id="prixShipping" @bind-Value="currentFacture.PrixShipping" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des commandes -->
+                    <div class="mt-4">
+                        @if (commandesFacture != null && commandesFacture.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="bg-dark text-white">
+                                        <tr>
+                                            <th>Produit</th>
+                                            <th>Prix Unitaire</th>
+                                            <th>Quantité</th>
+                                            <th>Total</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var commande in commandesFacture)
+                                        {
+                                            <tr>
+                                                <td>@(commande.Produit?.Nom ?? "Produit supprimé")</td>
+                                                <td>@commande.Prix.ToString("N2") DH</td>
+                                                <td>@commande.Qte</td>
+                                                <td>@commande.Total.ToString("N2") DH</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => RemoveCommande(commande)">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">Aucune commande associée</div>
+                        }
+                    </div>
+
+                    <!-- Total -->
+                    <div class="d-flex justify-content-end mt-3">
+                        <span class="badge-total">Total: @currentFacture.Total.ToString("N2") DH</span>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Liste des Commandes</h5>
+        <button class="btn btn-danger btn-sm" @onclick="ToggleSearch">
+            <i class="fas @(showSearch ? "fa-times" : "fa-search") me-1"></i> @(showSearch ? "Cacher" : "Rechercher")
+        </button>
+    </div>
+
+    @if (showSearch)
+    {
+        <div class="card-body bg-light">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Référence</label>
+                        <input type="text" class="form-control" @bind="searchReference" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Nom Client</label>
+                        <input type="text" class="form-control" @bind="searchNomClient" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label class="form-label">Montant Min</label>
+                        <input type="number" class="form-control" @bind="searchMinTotal" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label class="form-label">Montant Max</label>
+                        <input type="number" class="form-control" @bind="searchMaxTotal" />
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-danger me-2" @onclick="ApplyFilters">
+                    <i class="fas fa-filter me-1"></i> Appliquer
+                </button>
+                <button class="btn btn-outline-secondary" @onclick="ResetFilters">
+                    <i class="fas fa-broom me-1"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="card-body">
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-danger" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </div>
+        }
+        else if (factures == null || !factures.Any())
+        {
+            <div class="alert alert-info">Aucune facture trouvée</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th></th>
+                            <th>Référence</th>
+                            <th>Client</th>
+                            <th>Téléphone</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var facture in filteredFactures)
+                        {
+                            <tr class="commande-row" @onclick="() => ToggleCommandes(facture.Id)">
+                                <td>
+                                    <i class="fas @(expandedFactures.Contains(facture.Id) ? "fa-minus" : "fa-plus")"></i>
+                                </td>
+                                <td>@facture.Reference</td>
+                                <td>@facture.NomClient</td>
+                                <td>@facture.Telephone</td>
+                                <td>@facture.Total.ToString("N2") DH</td>
+                                <td>@facture.Commandes?.FirstOrDefault()?.Facture?.Date.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info me-2" @onclick="() => ViewDetails(facture.Id)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditFacture(facture)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteFacture(facture)">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            @if (expandedFactures.Contains(facture.Id))
+                            {
+                                <tr class="commande-details">
+                                    <td colspan="7">
+                                        <div class="p-3">
+                                            @if (facture.Commandes != null && facture.Commandes.Any())
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Produit</th>
+                                                                <th>Prix Unitaire</th>
+                                                                <th>Quantité</th>
+                                                                <th>Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var commande in facture.Commandes)
+                                                            {
+                                                                <tr>
+                                                                    <td>@(commande.Produit?.Nom ?? "Produit supprimé")</td>
+                                                                    <td>@commande.Prix.ToString("N2") DH</td>
+                                                                    <td>@commande.Qte</td>
+                                                                    <td>@commande.Total.ToString("N2") DH</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="alert alert-info">Aucune commande associée</div>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <select class="form-select form-select-sm me-2" style="width: auto; display: inline-block;"
+                            @bind="pageSize" @bind:event="oninput">
+                        <option value="5">5 par page</option>
+                        <option value="10">10 par page</option>
+                        <option value="20">20 par page</option>
+                        <option value="50">50 par page</option>
+                    </select>
+                    <Pagination ItemsCount="@totalItems" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="@OnPageChanged" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Facture> factures = new();
+    private List<Facture> filteredFactures = new();
+    private List<Commande> commandesFacture = new();
+    private HashSet<int> expandedFactures = new();
+    private bool isLoading = true;
+    private bool showForm = false;
+    private bool showSearch = false;
+    private Facture currentFacture = new();
+    private string? errorMessage;
+    private int currentPage = 1;
+    private int totalItems = 0;
+
+    // Filtres de recherche
+    private string searchReference = string.Empty;
+    private string searchNomClient = string.Empty;
+    private decimal? searchMinTotal;
+    private decimal? searchMaxTotal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            factures = await Context.Factures.Include(f => f.Commandes).ThenInclude(c => c.Produit)
+                .Where(f => !f.IsDeleted)
+                .OrderByDescending(f => f.Id)
+                .ToListAsync();
+
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors du chargement: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleCommandes(int factureId)
+    {
+        if (expandedFactures.Contains(factureId))
+        {
+            expandedFactures.Remove(factureId);
+        }
+        else
+        {
+            expandedFactures.Add(factureId);
+        }
+        StateHasChanged();
+    }
+
+    private void ApplyFilters()
+    {
+        var query = factures.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchReference))
+            query = query.Where(f => f.Reference.Contains(searchReference, StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrWhiteSpace(searchNomClient))
+            query = query.Where(f => f.NomClient.Contains(searchNomClient, StringComparison.OrdinalIgnoreCase));
+
+        if (searchMinTotal.HasValue)
+            query = query.Where(f => f.Total >= searchMinTotal.Value);
+
+        if (searchMaxTotal.HasValue)
+            query = query.Where(f => f.Total <= searchMaxTotal.Value);
+
+        filteredFactures = query.ToList();
+        totalItems = filteredFactures.Count;
+        currentPage = 1;
+        UpdatePagedData();
+    }
+
+    private void ResetFilters()
+    {
+        searchReference = string.Empty;
+        searchNomClient = string.Empty;
+        searchMinTotal = null;
+        searchMaxTotal = null;
+        ApplyFilters();
+    }
+
+    private void UpdatePagedData()
+    {
+        filteredFactures = filteredFactures
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void OnPageChanged(int page)
+    {
+        currentPage = page;
+        UpdatePagedData();
+    }
+
+    private void ToggleForm()
+    {
+        showForm = !showForm;
+        if (!showForm)
+        {
+            currentFacture = new Facture();
+            commandesFacture = new List<Commande>();
+        }
+        else if (currentFacture.Id == 0)
+        {
+            // Nouvelle facture - générer une référence
+            currentFacture.Reference = $"FACT-{DateTime.Now:yyyyMMddHHmmss}";
+            currentFacture.PrixShipping = 0;
+            currentFacture.Total = 0;
+        }
+    }
+
+    private void ToggleSearch()
+    {
+        showSearch = !showSearch;
+        if (!showSearch) ResetFilters();
+    }
+
+    private void ViewDetails(int id)
+    {
+        NavigationManager.NavigateTo($"/admin/commandes/{id}");
+    }
+
+    private void EditFacture(Facture facture)
+    {
+        currentFacture = new Facture
+        {
+            Id = facture.Id,
+            Reference = facture.Reference,
+            NomClient = facture.NomClient,
+            Telephone = facture.Telephone,
+            Email = facture.Email,
+            Adresse = facture.Adresse,
+            PrixShipping = facture.PrixShipping,
+            Total = facture.Total
+        };
+
+        commandesFacture = facture.Commandes?.ToList() ?? new List<Commande>();
+        showForm = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            // Calculer le total
+            currentFacture.Total = commandesFacture.Sum(c => c.Total) + currentFacture.PrixShipping;
+
+            if (currentFacture.Id == 0)
+            {
+                // Ajouter les commandes à la nouvelle facture
+                foreach (var commande in commandesFacture)
+                {
+                    commande.Facture = currentFacture;
+                    commande.FactureId = currentFacture.Id;
+                }
+
+                Context.Factures.Add(currentFacture);
+            }
+            else
+            {
+                // Mettre à jour la facture existante
+                var existingFacture = await Context.Factures
+                    .Include(f => f.Commandes)
+                    .FirstOrDefaultAsync(f => f.Id == currentFacture.Id);
+
+                if (existingFacture != null)
+                {
+                    // Mettre à jour les propriétés de la facture
+                    Context.Entry(existingFacture).CurrentValues.SetValues(currentFacture);
+
+                    // Mettre à jour les commandes
+                    foreach (var commande in commandesFacture)
+                    {
+                        var existingCommande = existingFacture.Commandes?.FirstOrDefault(c => c.Id == commande.Id);
+                        if (existingCommande != null)
+                        {
+                            Context.Entry(existingCommande).CurrentValues.SetValues(commande);
+                        }
+                        else
+                        {
+                            commande.FactureId = existingFacture.Id;
+                            Context.Commandes.Add(commande);
+                        }
+                    }
+
+                    // Supprimer les commandes qui ne sont plus dans la liste
+                    var commandesToRemove = existingFacture.Commandes?
+                        .Where(c => !commandesFacture.Any(cf => cf.Id == c.Id))
+                        .ToList();
+
+                    if (commandesToRemove != null)
+                    {
+                        foreach (var commande in commandesToRemove)
+                        {
+                            Context.Commandes.Remove(commande);
+                        }
+                    }
+                }
+            }
+
+            await Context.SaveChangesAsync();
+            showForm = false;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors de l'enregistrement: {ex.Message}";
+        }
+    }
+
+    private void CancelEdit()
+    {
+        showForm = false;
+        currentFacture = new Facture();
+        commandesFacture = new List<Commande>();
+    }
+
+    private async Task DeleteFacture(Facture facture)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer la facture {facture.Reference} ?"))
+        {
+            try
+            {
+                facture.IsDeleted = true;
+                await Context.SaveChangesAsync();
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Erreur lors de la suppression: {ex.Message}";
+            }
+        }
+    }
+
+    private void RemoveCommande(Commande commande)
+    {
+        commandesFacture.Remove(commande);
+        currentFacture.Total = commandesFacture.Sum(c => c.Total) + currentFacture.PrixShipping;
+    }
+
+    private int _pageSize = 10;
+
+    private int pageSize
+    {
+        get => _pageSize;
+        set
+        {
+            _pageSize = value;
+            UpdatePagedData();
+        }
+    }
+}

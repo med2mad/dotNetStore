@@ -1,0 +1,447 @@
+﻿@page "/admin/commandes/{id:int}"
+@layout dotNetStore.Components.Layout.AdminLayout
+@using Microsoft.EntityFrameworkCore
+@using dotNetStore.Data
+@using dotNetStore.Models
+@using dotNetStore.Components.Layout
+@inject ApplicationDbContext Context
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<style>
+    .form-animation {
+        transition: all 0.3s ease-in-out;
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    .form-animation.show {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 2000px;
+    }
+
+    .card-body td {
+        vertical-align: middle !important;
+    }
+
+    .form-animation input, select, textarea {
+        font-size: 14px !important;
+        border: solid gray 1px !important;
+    }
+
+    .form-animation button {
+        font-size: 14px !important;
+    }
+
+    .card-header button {
+        font-size: 14px !important;
+    }
+
+    .badge-facture {
+        background-color: #dc3545;
+        color: white;
+        font-size: 0.9em;
+        padding: 3px 8px;
+    }
+</style>
+
+<PageTitle>Gestion des Commandes</PageTitle>
+
+<div class="form-animation @(showForm ? "show" : "")">
+    @if (showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">@(currentCommande.Id == 0 ? "Ajouter une commande" : "Modifier la commande")</h5>
+            </div>
+            <div class="card-body">
+                <EditForm Model="@currentCommande" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="produitId" class="form-label">Produit</label>
+                                <InputSelect id="produitId" @bind-Value="currentCommande.ProduitId" class="form-select">
+                                    <option value="">-- Sélectionner un produit --</option>
+                                    @foreach (var produit in produits)
+                                    {
+                                        <option value="@produit.Id">@produit.Nom (@produit.Prix.ToString("N2") DH)</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => currentCommande.ProduitId)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="factureId" class="form-label">Facture</label>
+                                <InputSelect id="factureId" @bind-Value="currentCommande.FactureId" class="form-select">
+                                    <option value="">-- Sélectionner une facture --</option>
+                                    @foreach (var facture in factures)
+                                    {
+                                        <option value="@facture.Id">@facture.Reference - @facture.NomClient</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="prix" class="form-label">Prix Unitaire (DH)</label>
+                                <InputNumber id="prix" @bind-Value="currentCommande.Prix" class="form-control" />
+                                <ValidationMessage For="@(() => currentCommande.Prix)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="qte" class="form-label">Quantité</label>
+                                <InputNumber id="qte" @bind-Value="currentCommande.Qte" class="form-control" />
+                                <ValidationMessage For="@(() => currentCommande.Qte)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="prixShipping" class="form-label">Frais Livraison (DH)</label>
+                                <InputNumber id="prixShipping" @bind-Value="currentCommande.PrixShipping" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Liste des Commandes</h5>
+        <div>
+            <button class="btn btn-primary btn-sm me-2" @onclick="ToggleForm">
+                <i class="fas fa-plus me-1"></i> @(showForm ? "Masquer" : "Ajouter")
+            </button>
+            <button class="btn btn-danger btn-sm" @onclick="ToggleSearch">
+                <i class="fas @(showSearch ? "fa-times" : "fa-search") me-1"></i> @(showSearch ? "Cacher" : "Rechercher")
+            </button>
+        </div>
+    </div>
+
+    @if (showSearch)
+    {
+        <div class="card-body bg-light">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Produit</label>
+                        <input type="text" class="form-control" @bind="searchProduit" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Facture</label>
+                        <input type="text" class="form-control" @bind="searchFacture" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label class="form-label">Quantité Min</label>
+                        <input type="number" class="form-control" @bind="searchMinQte" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label class="form-label">Quantité Max</label>
+                        <input type="number" class="form-control" @bind="searchMaxQte" />
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-danger me-2" @onclick="ApplyFilters">
+                    <i class="fas fa-filter me-1"></i> Appliquer
+                </button>
+                <button class="btn btn-outline-secondary" @onclick="ResetFilters">
+                    <i class="fas fa-broom me-1"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="card-body">
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-danger" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </div>
+        }
+        else if (commandes == null || !commandes.Any())
+        {
+            <div class="alert alert-info">Aucune commande trouvée</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Prix Unitaire</th>
+                            <th>Quantité</th>
+                            <th>Total</th>
+                            <th>Facture</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var commande in filteredCommandes)
+                        {
+                            <tr>
+                                <td>@(commande.Produit?.Nom ?? "Produit supprimé")</td>
+                                <td>@commande.Prix.ToString("N2") DH</td>
+                                <td>@commande.Qte</td>
+                                <td>@commande.Total.ToString("N2") DH</td>
+                                <td>
+                                    @if (commande.Facture != null)
+                                    {
+                                        <span class="badge-facture">@commande.Facture.Reference</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Aucune</span>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditCommande(commande)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCommande(commande)">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <select class="form-select form-select-sm me-2" style="width: auto; display: inline-block;"
+                            @bind="pageSize" @bind:event="oninput">
+                        <option value="5">5 par page</option>
+                        <option value="10">10 par page</option>
+                        <option value="20">20 par page</option>
+                        <option value="50">50 par page</option>
+                    </select>
+                    <Pagination ItemsCount="@totalItems" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="@OnPageChanged" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Commande> commandes = new();
+    private List<Commande> filteredCommandes = new();
+    private List<Produit> produits = new();
+    private List<Facture> factures = new();
+    private bool isLoading = true;
+    private bool showForm = false;
+    private bool showSearch = false;
+    private Commande currentCommande = new();
+    private string? errorMessage;
+    private int currentPage = 1;
+    private int totalItems = 0;
+    [Parameter] public int Id { get; set; }
+
+    // Filtres de recherche
+    private string searchProduit = string.Empty;
+    private string searchFacture = string.Empty;
+    private int? searchMinQte;
+    private int? searchMaxQte;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            commandes = await Context.Commandes
+                .Include(c => c.Produit)
+                .Include(c => c.Facture)
+                .OrderByDescending(c => c.Id)
+                .Where(c=>c.FactureId==Id)
+                .ToListAsync();
+
+            produits = await Context.Produits
+                .Where(p => !p.IsDeleted)
+                .ToListAsync();
+
+            factures = await Context.Factures
+                .Where(f => !f.IsDeleted)
+                .ToListAsync();
+
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors du chargement: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        var query = commandes.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchProduit))
+            query = query.Where(c => c.Produit != null && c.Produit.Nom.Contains(searchProduit, StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrWhiteSpace(searchFacture))
+            query = query.Where(c => c.Facture != null && c.Facture.Reference.Contains(searchFacture, StringComparison.OrdinalIgnoreCase));
+
+        if (searchMinQte.HasValue)
+            query = query.Where(c => c.Qte >= searchMinQte.Value);
+
+        if (searchMaxQte.HasValue)
+            query = query.Where(c => c.Qte <= searchMaxQte.Value);
+
+        filteredCommandes = query.ToList();
+        totalItems = filteredCommandes.Count;
+        currentPage = 1;
+        UpdatePagedData();
+    }
+
+    private void ResetFilters()
+    {
+        searchProduit = string.Empty;
+        searchFacture = string.Empty;
+        searchMinQte = null;
+        searchMaxQte = null;
+        ApplyFilters();
+    }
+
+    private void UpdatePagedData()
+    {
+        filteredCommandes = filteredCommandes
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void OnPageChanged(int page)
+    {
+        currentPage = page;
+        UpdatePagedData();
+    }
+
+    private void ToggleForm()
+    {
+        showForm = !showForm;
+        if (!showForm)
+        {
+            currentCommande = new Commande();
+        }
+    }
+
+    private void ToggleSearch()
+    {
+        showSearch = !showSearch;
+        if (!showSearch) ResetFilters();
+    }
+
+    private void EditCommande(Commande commande)
+    {
+        currentCommande = new Commande
+        {
+            Id = commande.Id,
+            Nom = commande.Nom,
+            Prix = commande.Prix,
+            PrixShipping = commande.PrixShipping,
+            Qte = commande.Qte,
+            Total = commande.Total,
+            ProduitId = commande.ProduitId,
+            FactureId = commande.FactureId
+        };
+        showForm = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            currentCommande.Total = currentCommande.Prix * currentCommande.Qte + currentCommande.PrixShipping;
+
+            if (currentCommande.Id == 0)
+            {
+                Context.Commandes.Add(currentCommande);
+            }
+            else
+            {
+                var existingCommande = await Context.Commandes.FindAsync(currentCommande.Id);
+                if (existingCommande != null)
+                {
+                    Context.Entry(existingCommande).CurrentValues.SetValues(currentCommande);
+                }
+            }
+
+            await Context.SaveChangesAsync();
+            showForm = false;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors de l'enregistrement: {ex.Message}";
+        }
+    }
+
+    private void CancelEdit()
+    {
+        showForm = false;
+        currentCommande = new Commande();
+    }
+
+    private async Task DeleteCommande(Commande commande)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer cette commande ?"))
+        {
+            try
+            {
+                Context.Commandes.Remove(commande);
+                await Context.SaveChangesAsync();
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Erreur lors de la suppression: {ex.Message}";
+            }
+        }
+    }
+
+    private int _pageSize = 10;
+
+    private int pageSize
+    {
+        get => _pageSize;
+        set
+        {
+            _pageSize = value;
+            UpdatePagedData();
+        }
+    }
+}

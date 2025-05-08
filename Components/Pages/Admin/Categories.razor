@@ -1,0 +1,356 @@
+﻿@page "/admin/categories"
+@layout dotNetStore.Components.Layout.AdminLayout
+@using Microsoft.EntityFrameworkCore
+@using dotNetStore.Data
+@using dotNetStore.Models
+@using dotNetStore.Components.Layout
+@inject ApplicationDbContext Context
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<style>
+    .form-animation {
+        transition: all 0.3s ease-in-out;
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    .form-animation.show {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 2000px;
+    }
+
+    .card-body td {
+        vertical-align: middle !important;
+    }
+
+    .form-animation input, select, textarea {
+        font-size: 14px !important;
+        border: solid gray 1px !important;
+    }
+
+    .form-animation button {
+        font-size: 14px !important;
+    }
+
+    .card-header button {
+        font-size: 14px !important;
+    }
+</style>
+
+<PageTitle>Gestion des Catégories</PageTitle>
+
+<div class="form-animation @(showForm ? "show" : "")">
+    @if (showForm)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">@(currentCategorie.Id == 0 ? "Ajouter une catégorie" : "Modifier la catégorie")</h5>
+            </div>
+            <div class="card-body">
+                <EditForm Model="@currentCategorie" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="categorie" class="form-label">Catégorie</label>
+                                <InputText id="categorie" @bind-Value="currentCategorie.Categorie" class="form-control" />
+                                <ValidationMessage For="@(() => currentCategorie.Categorie)" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sousCategorie" class="form-label">Sous-catégorie (optionnel)</label>
+                                <InputText id="sousCategorie" @bind-Value="currentCategorie.SousCategorie" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Liste des Catégories</h5>
+        <div>
+            <button class="btn btn-primary btn-sm me-2" @onclick="ShowAddForm">
+                <i class="fas fa-plus me-1"></i> Ajouter
+            </button>
+            <button class="btn btn-danger btn-sm" @onclick="ToggleSearch">
+                <i class="fas @(showSearch ? "fa-times" : "fa-search") me-1"></i> @(showSearch ? "Cacher" : "Rechercher")
+            </button>
+        </div>
+    </div>
+
+    @if (showSearch)
+    {
+        <div class="card-body bg-light">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Catégorie</label>
+                        <input type="text" class="form-control" @bind="searchCategorie" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Sous-catégorie</label>
+                        <input type="text" class="form-control" @bind="searchSousCategorie" />
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-danger me-2" @onclick="ApplyFilters">
+                    <i class="fas fa-filter me-1"></i> Appliquer
+                </button>
+                <button class="btn btn-outline-secondary" @onclick="ResetFilters">
+                    <i class="fas fa-broom me-1"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="card-body">
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </div>
+        }
+        else if (filteredCategories == null || !filteredCategories.Any())
+        {
+            <div class="alert alert-info">Aucune catégorie trouvée</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" style="vertical-align: middle;">
+                    <thead>
+                        <tr>
+                            <th>Catégorie</th>
+                            <th>Sous-catégorie</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var categorie in pagedCategories)
+                        {
+                            <tr>
+                                <td>@categorie.Categorie</td>
+                                <td>@(string.IsNullOrEmpty(categorie.SousCategorie) ? "-" : categorie.SousCategorie)</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditCategorie(categorie)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCategorie(categorie)">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <select class="form-select form-select-sm me-2" style="width: auto; display: inline-block;"
+                            @bind="pageSize" @bind:event="oninput">
+                        <option value="5">5 par page</option>
+                        <option value="10">10 par page</option>
+                        <option value="20">20 par page</option>
+                        <option value="50">50 par page</option>
+                    </select>
+                    <Pagination ItemsCount="@totalItems" PageSize="@pageSize" CurrentPage="@currentPage" OnPageChanged="@OnPageChanged" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<CategorieProduit> categories = new();
+    private List<CategorieProduit> filteredCategories = new();
+    private List<CategorieProduit> pagedCategories = new();
+    private bool isLoading = true;
+    private bool showForm = false;
+    private bool showSearch = false;
+    private CategorieProduit currentCategorie = new() { Categorie = "", SousCategorie = "" };
+    private string? errorMessage;
+    private int currentPage = 1;
+    private int totalItems = 0;
+
+    // Filtres de recherche
+    private string searchCategorie = string.Empty;
+    private string searchSousCategorie = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            categories = await Context.CategoriesProduits.ToListAsync();
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors du chargement: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        var query = categories.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchCategorie))
+            query = query.Where(c => c.Categorie.Contains(searchCategorie, StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrWhiteSpace(searchSousCategorie))
+            query = query.Where(c => !string.IsNullOrEmpty(c.SousCategorie) && 
+                   c.SousCategorie.Contains(searchSousCategorie, StringComparison.OrdinalIgnoreCase));
+
+        filteredCategories = query.ToList();
+        totalItems = filteredCategories.Count;
+        currentPage = 1;
+        UpdatePagedData();
+    }
+
+    private void ResetFilters()
+    {
+        searchCategorie = string.Empty;
+        searchSousCategorie = string.Empty;
+        ApplyFilters();
+    }
+
+    private void UpdatePagedData()
+    {
+        pagedCategories = filteredCategories
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void OnPageChanged(int page)
+    {
+        currentPage = page;
+        UpdatePagedData();
+    }
+
+    private void ToggleSearch()
+    {
+        showSearch = !showSearch;
+        if (!showSearch) ResetFilters();
+    }
+
+    private void ShowAddForm()
+    {
+        currentCategorie = new CategorieProduit() { Categorie = "", SousCategorie = "" };
+        showForm = true;
+    }
+
+    private void EditCategorie(CategorieProduit categorie)
+    {
+        currentCategorie = new CategorieProduit
+        {
+            Id = categorie.Id,
+            Categorie = categorie.Categorie,
+            SousCategorie = categorie.SousCategorie
+        };
+        showForm = true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (currentCategorie.Id == 0)
+            {
+                Context.CategoriesProduits.Add(currentCategorie);
+            }
+            else
+            {
+                var existingCategorie = await Context.CategoriesProduits.FindAsync(currentCategorie.Id);
+                if (existingCategorie != null)
+                {
+                    Context.Entry(existingCategorie).CurrentValues.SetValues(currentCategorie);
+                }
+            }
+
+            await Context.SaveChangesAsync();
+            showForm = false;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erreur lors de l'enregistrement: {ex.Message}";
+        }
+    }
+
+    private void CancelEdit()
+    {
+        showForm = false;
+        currentCategorie = new CategorieProduit() { Categorie = "", SousCategorie = "" };
+    }
+
+    private async Task DeleteCategorie(CategorieProduit categorie)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer la catégorie \"{categorie.Categorie}\" ?"))
+        {
+            try
+            {
+                var produitsAssocies = await Context.Produits.AnyAsync(p => p.CategorieId == categorie.Id);
+
+                if (produitsAssocies)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "Impossible de supprimer cette catégorie car elle est utilisée par des produits");
+                    return;
+                }
+
+                Context.CategoriesProduits.Remove(categorie);
+                await Context.SaveChangesAsync();
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Erreur lors de la suppression: {ex.Message}";
+            }
+        }
+    }
+
+    private int _pageSize = 10;
+
+    private int pageSize
+    {
+        get => _pageSize;
+        set
+        {
+            _pageSize = value;
+            UpdatePagedData();
+        }
+    }
+}

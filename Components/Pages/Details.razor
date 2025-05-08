@@ -15,6 +15,17 @@
 		.product .product-img img:hover {
 		transform: scale(1.1);
 		}
+
+
+		.product .product-img {
+			overflow: hidden !important;
+			height: 262px !important;
+		}
+
+			.product .product-img img {
+				height: 262px !important;
+				width: 262px !important;
+			}
 	</style>
 </HeadContent>
 
@@ -193,9 +204,9 @@
 				ProduitId = P.Id,
 				Nom = P.Nom,
 				Photo = P.Photo1,
-				Prix = P.Prix ?? 0,
-				Total = (P.Prix ?? 0) * qte,
-				PrixShipping = (P.PrixShipping ?? 0) * qte,
+				Prix = P.Prix,
+				Total = P.Prix * qte,
+				PrixShipping = P.PrixShipping * qte,
 				Qte = qte
 			});
 			qte = 1;

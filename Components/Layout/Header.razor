@@ -1,4 +1,5 @@
-﻿@using dotNetStore.Models
+﻿@using dotNetStore.Data
+@using dotNetStore.Models
 @inject NavigationManager _NavManager
 @inject CartService _Cart
 @inject IJSRuntime _JSRuntime
@@ -38,9 +39,12 @@
 						<form @onsubmit="GoToFiltres" @onsubmit:preventDefault>
 							<select @bind="MarqueId" class="input-select">
 								<option value="0" style="text-align:center;">Tous ...</option>
-								@foreach (var m in Marques)
+								@if (Marques != null)
 								{
-									<option value="@m.Id">@m.Nom</option>
+									@foreach (var m in Marques)
+									{
+										<option value="@m.Id">@m.Nom</option>
+									}
 								}
 							</select>
 							<input @bind="Text" @bind:event="oninput" class="input" placeholder="Recherche">
@@ -126,6 +130,7 @@
 				<li><NavLink href="/Contacts">Contacts</NavLink></li>
 				<li><NavLink href="/Apropos">A propos de nous</NavLink></li>
 				<li><NavLink href="/Politique">Mentions légales</NavLink></li>
+				<li><NavLink href="/admin/Produits">Administration</NavLink></li>
 @* 				@foreach (var c in Categories)
 				{
 					var link = "/Filtres/" + @c.Id;
@@ -139,7 +144,6 @@
 	<!-- /container -->
 </nav>
 <!-- /NAVIGATION -->
-
 @code {
 	string Text = "";
 	int MarqueId = 0;
