@@ -62,12 +62,12 @@
                                 <ValidationMessage For="@(() => currentCategorie.Categorie)" />
                             </div>
                         </div>
-                        <div class="col-md-6">
+@*                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="sousCategorie" class="form-label">Sous-catégorie (optionnel)</label>
                                 <InputText id="sousCategorie" @bind-Value="currentCategorie.SousCategorie" class="form-control" />
                             </div>
-                        </div>
+                        </div> *@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
@@ -103,12 +103,12 @@
                         <input type="text" class="form-control" @bind="searchCategorie" />
                     </div>
                 </div>
-                <div class="col-md-6">
+@*                 <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label">Sous-catégorie</label>
                         <input type="text" class="form-control" @bind="searchSousCategorie" />
                     </div>
-                </div>
+                </div> *@
             </div>
             <div class="d-flex justify-content-end">
                 <button class="btn btn-danger me-2" @onclick="ApplyFilters">
@@ -141,7 +141,7 @@
                     <thead>
                         <tr>
                             <th>Catégorie</th>
-                            <th>Sous-catégorie</th>
+                            @* <th>Sous-catégorie</th> *@
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -150,7 +150,7 @@
                         {
                             <tr>
                                 <td>@categorie.Categorie</td>
-                                <td>@(string.IsNullOrEmpty(categorie.SousCategorie) ? "-" : categorie.SousCategorie)</td>
+                                @* <td>@(string.IsNullOrEmpty(categorie.SousCategorie) ? "-" : categorie.SousCategorie)</td> *@
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditCategorie(categorie)">
                                         <i class="fas fa-edit"></i>
